@@ -1,0 +1,4 @@
+pkg/include/*
+.sketches
+./build/obj
+repomix-output.xml
