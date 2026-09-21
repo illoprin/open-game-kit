@@ -88,6 +88,6 @@ bool GL::PopError() noexcept {
       break;
   }
 
-  std::printf("[GL ERROR] [0x%04x] %s", error, buf);
+  std::printf("[GL ERROR] [0x%04x] %s\n", error, buf);
   return true;
 }

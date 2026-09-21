@@ -55,7 +55,11 @@ public:
 
 int main() {
     Config conf{.WinSize = {1920, 1080}};
-    og_assert(Engine::Create(&conf), "Failed to create engine");
+    
+    if (!Engine::Create(&conf)) {
+      std::println("Failed to create engine");
+      std::terminate();
+    };
 
     std::unique_ptr<IEngineState> state(new GameState);
     Engine::SetState(state);

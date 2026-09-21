@@ -7,7 +7,8 @@
 
 std::unique_ptr<IEngineState> Engine::currentState(nullptr);
 bool                          Engine::created = false;
-glm::ivec2                    Engine::screenSize{0, 0};
+glm::ivec2                    e_screenSize{0, 0};
+const Config* e_cfg = nullptr;
 
 glm::ivec2 computeScreenSize(glm::ivec2 size, float r) {
   return {
@@ -24,12 +25,15 @@ IEngineState::IEngineState() {
 }
 
 bool Engine::Create(const Config* cfg) {
+  cfg ? e_cfg = cfg : e_cfg = new Config;
+
   if (created) return false;
   // win size - glm::ivec2
-  og_assert(Window::Create(cfg->WinSize), "Failed to create window");
+  og_assert(Window::Create(e_cfg->WinSize), "Failed to create window");
   og_assert(GL::CreateContext(), "Failed to create OpenGL 3.3 context");
 
   Window::SetResizeCallback([](int w, int h) {
+    e_screenSize = computeScreenSize({w,h}, e_cfg->Ratio);
     if (currentState) currentState->OnResize();
   });
 
@@ -68,6 +72,8 @@ bool Engine::Create(const Config* cfg) {
   Window::ShowAndFocus();
   VertexArray::Unbind();
   created = true;
+  e_screenSize = computeScreenSize(Window::Size(), e_cfg->Ratio);
+
   return true;
 }
 
@@ -127,5 +133,5 @@ void Engine::Destroy() {
 }
 
 glm::ivec2 Engine::GetScreenSize() {
-  return screenSize;
+  return e_screenSize;
 }

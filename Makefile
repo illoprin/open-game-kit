@@ -18,5 +18,10 @@ all: $(TARGET)
 	cp pkg/lib/*.dll $(BUILD_DIR)
 	./$<
 
-$(TARGET):
-	$(CXX) $(CFLAGS) $(SRC_DIR)/*.cc $(INCLUDE) $(LIBS) -o $@ $(LDFLAGS)
+$(TARGET): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CFLAGS) $^ $(INCLUDE) $(LIBS) -o $@ $(LDFLAGS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
+	@mkdir -p $(dir $@)
+	$(CXX) $(CFLAGS) $(INCLUDE) -c $< -o $@

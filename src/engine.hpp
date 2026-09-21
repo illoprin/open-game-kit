@@ -6,7 +6,9 @@
 
 struct Config {
   glm::ivec2 WinSize;
-  bool       Debug = true;
+  float      Ratio = 0.75;
+  char       ScreenshotsPath[32] = "screenshots";
+  bool       Debug               = true;
 };
 
 class IEngineState {
@@ -60,5 +62,4 @@ private:
 
   static bool                          created;
   static std::unique_ptr<IEngineState> currentState;
-  static glm::ivec2                    screenSize;
 };

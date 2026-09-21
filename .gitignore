@@ -1,4 +1,4 @@
 pkg/include/*
 .sketches
-./build/obj
+build/obj
 repomix-output.xml

@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "GLFW/glfw3.h"
 #include "log.hpp"
 #include "window.hpp"
 
@@ -6,14 +7,17 @@ GLFWwindow*            Window::handle         = nullptr;
 Window::ResizeCallback Window::resizeCallback = nullptr;
 bool                   Window::created        = false;
 bool                   Window::grabbed        = false;
+bool w_last_grabbed;
 
 bool Window::Create(const glm::ivec2& size) {
   if (created) return false;
 
   if (!glfwInit()) { return false; }
 
+  glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -33,7 +37,12 @@ bool Window::Create(const glm::ivec2& size) {
   });
 
   glfwSetWindowFocusCallback(handle, [](GLFWwindow*, int focused) {
-    ToggleMouseGrab();
+    if (!focused) {
+      w_last_grabbed = grabbed;
+      ToggleMouseGrab();
+    } else {
+      if (w_last_grabbed) ToggleMouseGrab();
+    }
   });
 
   created = true;
@@ -72,6 +81,7 @@ void Window::ShowAndFocus() {
 }
 
 void Window::ToggleMouseGrab() {
+  if (!created) return;
   grabbed = !grabbed;
   if (grabbed) {
     glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -86,6 +96,7 @@ bool Window::ShouldClose() {
 }
 
 void Window::PollEvents() {
+  if (!created) return;
   glfwPollEvents();
 }
 

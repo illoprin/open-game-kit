@@ -1,12 +1,19 @@
-#include "buffer.hpp"
+#include "camera.hpp"
 #include "engine.hpp"
+#include "files.hpp"
+#include "fly_controller.hpp"
 #include "gl_state.hpp"
+#include "input.hpp"
 #include "log.hpp"
+#include "mesh.hpp"
+#include "model.hpp"
+#include "program.hpp"
 #include "resource.hpp"
+#include "texture.hpp"
 #include "utils.hpp"
-#include "vertex_array.hpp"
 #include "window.hpp"
 #include <glm/vec3.hpp>
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -17,36 +24,67 @@
 glm::vec2 vertices[] = {
   {-0.5f, -0.5f}, // 0: Bottom-left
   {0.5f,  -0.5f}, // 1: Bottom-right
-  {0.5f,  0.5f}, // 2: Top-right
-  {-0.5f, 0.5f}  // 3: Top-left
+  {0.5f,  0.5f }, // 2: Top-right
+  {-0.5f, 0.5f }  // 3: Top-left
 };
 
 uint indices[] = {
-  0,1,2,  // First triangle
-  0,2,3  // Second triangle
+  0,
+  1,
+  2,  // First triangle
+  0,
+  2,
+  3  // Second triangle
 };
 
 class BlueState : public IEngineState {
-  VertexArray vao;
-  Buffer      vbo{GL_ARRAY_BUFFER};
-  Buffer      ebo{GL_ELEMENT_ARRAY_BUFFER};
+  Mesh mCube;
+  Texture2D   tCrate;
+  Texture2D   tCorrugate;
+  Texture2D   tColors;
+  Program     pMain;
+
+  FlyController controller;
+  Camera3D cam;
 
 public:
 
   BlueState() {
 
-    vbo.Allocate(sizeof(vertices), GL_STATIC_DRAW, vertices);
-    ebo.Allocate(sizeof(indices), GL_STATIC_DRAW, indices);
-    Attribute in_position = {
-      .Location   = 0,
-      .Comps      = 2,
-      .Type       = GL_FLOAT,
-      .Normalized = false,
-      .Stride     = sizeof(glm::vec2),
-      .Offset     = 0,
+    controller.SetMaxSpeed(8.0);
+
+    // mesh
+    auto res =  Geometry::FromObj(ModelPath("shotgun.obj"));
+    if (!res.has_value()) {
+      log(LogLevel::Error, "failed load model\n{}", res.error());
+      std::exit(1);
+    }
+    mCube.FromGeometry(res.value());
+
+    // texture
+
+    Image2D img;
+    auto loadTexture = [&](Texture2D& tex, std::string path) {
+      og_assert(img.FromFile(TexturePath(path)), "failed load texture");
+      tex.FromData(img.Pix(), img.Width(), img.Height(), GL_RGB8);
+      tex.GenerateMipmaps();
+      tex.SetSamplerState(GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR);
     };
-    vao.SetAttribute(vbo, {in_position});
-    vao.AttachIndexBuffer(ebo);
+
+    loadTexture(tCrate, "crate.png");
+    loadTexture(tCorrugate, "corrugate.png");
+    loadTexture(tColors, "colors.png");
+    
+    // program
+    og_assert(
+      Program::FastLoad(
+        pMain,
+        ShaderPath("basic.vert"), 
+        ShaderPath("basic.frag")
+      ), "failed load program"
+    );
+    
+    std::println("scene loaded");
   }
 
   void OnEnter() noexcept override {
@@ -57,22 +95,27 @@ public:
   }
 
   void Update() noexcept override {
-    
+
+    if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) Window::ToggleMouseGrab();
+
+    if (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1))
+      controller.Update(cam);
+    cam.Update(Window::Size());
   }
 
   void Render() noexcept override {
-    // draw on back buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDrawBuffer(GL_BACK);
-
     // clear framebuffer
     auto size = Window::Size();
     glViewport(0, 0, size.x, size.y);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    tColors.Bind(0);
+    pMain.Use();
+    pMain.SetInt("u_diffuse", 0);
+    pMain.SetMat4("u_pv", cam.GetProjection() * cam.GetView());
 
     // draw
-    GL::DrawElements(vao, 6, GL_UNSIGNED_INT);
-
+    GL::DrawElements(mCube.GetVAO(), mCube.GetIndexCount(), GL_UNSIGNED_INT);
   }
 
   ~BlueState() override {
