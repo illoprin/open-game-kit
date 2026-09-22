@@ -17,10 +17,12 @@ inline glm::mat4 CreateModel(const Transform& transform) {
 
   // Apply rotations (typically in ZYX or XYZ order, here applying pitch, yaw,
   // roll)
-  model = glm::rotate(model, transform.Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-  model = glm::rotate(model, transform.Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-  model = glm::rotate(model, transform.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-
+  if (transform.Rotation.x != 0.0f)
+    model = glm::rotate(model, glm::radians(transform.Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+  if (transform.Rotation.y != 0.0f)
+    model = glm::rotate(model, glm::radians(transform.Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+  if (transform.Rotation.z != 0.0f)
+    model = glm::rotate(model, glm::radians(transform.Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
   // Apply scale
   model = glm::scale(model, transform.Scale);
 

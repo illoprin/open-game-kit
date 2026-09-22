@@ -1,7 +1,7 @@
 #pragma once
 
 #include "buffer.hpp"
-#include "model.hpp"
+#include "geometry.hpp"
 #include "vertex_array.hpp"
 
 class Mesh {

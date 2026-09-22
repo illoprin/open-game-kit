@@ -5,7 +5,7 @@
 #include <glm/vec3.hpp>
 
 constexpr float CAM_NEAR = 0.01;
-constexpr float CAM_FAR  = 100.0;
+constexpr float CAM_FAR  = 1000.0;
 
 class Camera3D {
   glm::mat4 proj, view;

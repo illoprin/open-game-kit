@@ -2,17 +2,15 @@
 #include "engine.hpp"
 #include "files.hpp"
 #include "fly_controller.hpp"
-#include "gl_state.hpp"
 #include "input.hpp"
 #include "log.hpp"
-#include "mesh.hpp"
-#include "model.hpp"
+#include "map_parser.hpp"
+#include "map_renderer.hpp"
 #include "program.hpp"
-#include "texture.hpp"
-#include "transforms.hpp"
 #include "utils.hpp"
 #include "window.hpp"
 #include <glm/vec3.hpp>
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -37,11 +35,8 @@ uint indices[] = {
 };
 
 class BlueState : public IEngineState {
-  Mesh      mShotgun;
-  Mesh      mCrate;
-  Texture2D tCrate;
-  Texture2D tColors;
-  Program   pMain;
+  Program     pMain;
+  MapRenderer mr;
 
   FlyController controller;
   Camera3D      cam;
@@ -49,38 +44,24 @@ class BlueState : public IEngineState {
 public:
 
   BlueState() {
-    controller.SetMaxSpeed(8.0);
+    // setup controller
+
+    controller.SetMaxSpeed(20.0);
     cam.Position.z += 3.0;
     cam.Position.y += 1.5;
 
-    // crate model
-    auto crateRes = Geometry::FromObj(ModelPath("crate.obj"));
-    if (!crateRes.has_value()) {
-      log(LogLevel::Error, "failed load crate model\n{}", crateRes.error());
+    // load map
+
+    MapData md;
+    if (!md.LoadGameMap(LevelPath("bluearena150.ogk.map"))) {
+      log(LogLevel::Error, "failed load map");
       std::exit(1);
-    }
-    mCrate.FromGeometry(crateRes.value());
-
-    // shotgun
-    auto shotGunRes = Geometry::FromObj(ModelPath("shotgun.obj"));
-    if (!shotGunRes.has_value()) {
-      log(LogLevel::Error, "failed load shotgun model\n{}", shotGunRes.error());
-      std::exit(1);
-    }
-    mShotgun.FromGeometry(shotGunRes.value());
-
-    // texture
-
-    Image2D img;
-    auto    loadTexture = [&](Texture2D& tex, std::string path) {
-      og_assert(img.FromFile(TexturePath(path)), "failed load texture");
-      tex.FromData(img.Pix(), img.Width(), img.Height(), GL_RGB8);
-      tex.GenerateMipmaps();
-      tex.SetSamplerState(GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR);
     };
 
-    loadTexture(tCrate, "crate_128.png");
-    loadTexture(tColors, "colors.png");
+    if (!mr.Initialize(md)) {
+      log(LogLevel::Error, "failed to init map renderer");
+      std::exit(1);
+    };
 
     // program
     og_assert(
@@ -96,8 +77,9 @@ public:
   }
 
   void OnEnter() noexcept override {
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
     log(LogLevel::Info, "blue state enter");
-
   }
 
   void Update() noexcept override {
@@ -109,23 +91,10 @@ public:
     cam.Update(Window::Size());
   }
 
-  void renderPrefab(
-    const Mesh&      mesh,
-    const Texture2D& tex,
-    const glm::mat4& model
-  ) const {
-    // configure
-    tex.Bind(0);
-    pMain.SetMat4("u_model", model);
-
-    // draw
-    GL::DrawElements(mesh.GetVAO(), mesh.GetIndexCount(), GL_UNSIGNED_INT);
-  }
-
   void Render() noexcept override {
 
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // glDrawBuffer(GL_BACK);
 
     // clear framebuffer
     auto size = Window::Size();
@@ -137,15 +106,7 @@ public:
     pMain.SetMat4("u_view", cam.GetView());
     pMain.SetInt("u_diffuse", 0);
 
-    renderPrefab(mCrate, tCrate, glm::mat4(1.0));
-    renderPrefab(
-      mShotgun,
-      tColors,
-      CreateModel(glm::vec3(0, 2.5, 0), glm::vec3(0.35))
-    );
-
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
+    mr.Render(pMain);
   }
 
   ~BlueState() override {

@@ -1,0 +1,22 @@
+# OpenGameKit Map Format
+NAME "Blue Arena"
+
+# TEXTURE <id> <path>
+TEXTURE tiles assets/textures/blue_tiles.png
+TEXTURE corrugate assets/textures/corrugate.png
+TEXTURE concrete assets/textures/gray_concrete.png
+TEXTURE crate assets/textures/crate.png
+TEXTURE bricks assets/textures/dark_bricks.png
+
+# GEOMETRY <id> <geometry_path>
+GEOMETRY crate assets/models/create.obj
+
+# MATERIAL <id> <diffuse_id | null> <emissive_id | null> <tint>
+MATERIAL mat_crate crate NULL (1,1,1)
+
+# INSTANCE <proto_id> <material_id> <uv_scale> <pos> <scl> <rot>
+# INSTANCE cube brick 1.0 (-1, 0, 1) (1, 1, 1) (0, 23, 0)
+# `proto_id` can be initial primitive `cube [-1..1]` `plane [-1..1]`
+
+# LIGHT <type> <pos> <intensity> <radius> <color> <direction | null>
+# there is two types of lights - `point` `directional`
