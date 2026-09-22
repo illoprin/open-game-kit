@@ -17,7 +17,9 @@ void GL::DrawArrays(
     glDrawArraysInstanced(GL_TRIANGLES, 0, count, instances);
   else
     glDrawArrays(GL_TRIANGLES, 0, count);
-  VertexArray::Unbind();
+
+  stats.DrawCalls += 1;
+  stats.Triangles += count / 3;
 }
 
 void GL::DrawElements(
@@ -31,7 +33,9 @@ void GL::DrawElements(
     glDrawElementsInstanced(GL_TRIANGLES, count, data_type, nullptr, instances);
   else
     glDrawElements(GL_TRIANGLES, count, data_type, nullptr);
-  VertexArray::Unbind();
+
+  stats.DrawCalls += 1;
+  stats.Triangles += count / 3;
 }
 
 const RenderStats& GL::GetStats() {
@@ -88,6 +92,6 @@ bool GL::PopError() noexcept {
       break;
   }
 
-  std::printf("[GL ERROR] [0x%04x] %s\n", error, buf);
+  std::printf(BOLDYELLOW "[GL ERROR] [0x%04x] %s\n" RESET, error, buf);
   return true;
 }

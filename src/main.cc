@@ -3,6 +3,7 @@
 #include "files.hpp"
 #include "fly_controller.hpp"
 #include "gl_state.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "input.hpp"
 #include "log.hpp"
 #include "mesh.hpp"
@@ -10,10 +11,10 @@
 #include "program.hpp"
 #include "resource.hpp"
 #include "texture.hpp"
+#include "transforms.hpp"
 #include "utils.hpp"
 #include "window.hpp"
 #include <glm/vec3.hpp>
-
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -38,60 +39,67 @@ uint indices[] = {
 };
 
 class BlueState : public IEngineState {
-  Mesh mCube;
-  Texture2D   tCrate;
-  Texture2D   tCorrugate;
-  Texture2D   tColors;
-  Program     pMain;
+  Mesh      mShotgun;
+  Mesh      mCrate;
+  Texture2D tCrate;
+  Texture2D tColors;
+  Program   pMain;
 
   FlyController controller;
-  Camera3D cam;
+  Camera3D      cam;
 
 public:
 
   BlueState() {
-
     controller.SetMaxSpeed(8.0);
+    cam.Position.z += 3.0;
+    cam.Position.y += 1.5;
 
-    // mesh
-    auto res =  Geometry::FromObj(ModelPath("shotgun.obj"));
-    if (!res.has_value()) {
-      log(LogLevel::Error, "failed load model\n{}", res.error());
+    // crate model
+    auto crateRes = Geometry::FromObj(ModelPath("crate.obj"));
+    if (!crateRes.has_value()) {
+      log(LogLevel::Error, "failed load crate model\n{}", crateRes.error());
       std::exit(1);
     }
-    mCube.FromGeometry(res.value());
+    mCrate.FromGeometry(crateRes.value());
+
+    // shotgun
+    auto shotGunRes = Geometry::FromObj(ModelPath("shotgun.obj"));
+    if (!shotGunRes.has_value()) {
+      log(LogLevel::Error, "failed load shotgun model\n{}", shotGunRes.error());
+      std::exit(1);
+    }
+    mShotgun.FromGeometry(shotGunRes.value());
 
     // texture
 
     Image2D img;
-    auto loadTexture = [&](Texture2D& tex, std::string path) {
+    auto    loadTexture = [&](Texture2D& tex, std::string path) {
       og_assert(img.FromFile(TexturePath(path)), "failed load texture");
       tex.FromData(img.Pix(), img.Width(), img.Height(), GL_RGB8);
       tex.GenerateMipmaps();
       tex.SetSamplerState(GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR);
     };
 
-    loadTexture(tCrate, "crate.png");
-    loadTexture(tCorrugate, "corrugate.png");
+    loadTexture(tCrate, "crate_128.png");
     loadTexture(tColors, "colors.png");
-    
+
     // program
     og_assert(
       Program::FastLoad(
         pMain,
-        ShaderPath("basic.vert"), 
+        ShaderPath("basic.vert"),
         ShaderPath("basic.frag")
-      ), "failed load program"
+      ),
+      "failed load program"
     );
-    
-    std::println("scene loaded");
+
+    log(LogLevel::Info, "scene loaded");
   }
 
   void OnEnter() noexcept override {
-    std::println("blue state enter");
+    log(LogLevel::Info, "blue state enter");
 
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
   }
 
   void Update() noexcept override {
@@ -103,23 +111,47 @@ public:
     cam.Update(Window::Size());
   }
 
+  void renderPrefab(
+    const Mesh&      mesh,
+    const Texture2D& tex,
+    const glm::mat4& model
+  ) const {
+    // configure
+    tex.Bind(0);
+    pMain.SetMat4("u_model", model);
+
+    // draw
+    GL::DrawElements(mesh.GetVAO(), mesh.GetIndexCount(), GL_UNSIGNED_INT);
+  }
+
   void Render() noexcept override {
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
     // clear framebuffer
     auto size = Window::Size();
     glViewport(0, 0, size.x, size.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    tColors.Bind(0);
-    pMain.Use();
-    pMain.SetInt("u_diffuse", 0);
-    pMain.SetMat4("u_pv", cam.GetProjection() * cam.GetView());
 
-    // draw
-    GL::DrawElements(mCube.GetVAO(), mCube.GetIndexCount(), GL_UNSIGNED_INT);
+    pMain.Use();
+    pMain.SetMat4("u_projection", cam.GetProjection());
+    pMain.SetMat4("u_view", cam.GetView());
+    pMain.SetInt("u_diffuse", 0);
+
+    renderPrefab(mCrate, tCrate, glm::mat4(1.0));
+    renderPrefab(
+      mShotgun,
+      tColors,
+      CreateModel(glm::vec3(0, 2.5, 0), glm::vec3(0.35))
+    );
+
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
   }
 
   ~BlueState() override {
-    std::println("blue state destroy");
+    log(LogLevel::Info, "blue state destroy");
   }
 };
 

@@ -17,10 +17,6 @@ struct Attribute {
 };
 
 class VertexArray : public Resource {
-private:
-
-  static GLuint vao_binding;
-
 public:
   VertexArray() {
     glGenVertexArrays(1, &id);
@@ -56,12 +52,10 @@ public:
   void SetAttribute(const Buffer&, const std::vector<Attribute>&) noexcept;
 
   void Bind() const {
-    if (vao_binding == id) return;
     glBindVertexArray(id);
   }
 
   static void Unbind() {
-    if (vao_binding == 0) return;
     glBindVertexArray(0);
   }
 

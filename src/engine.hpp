@@ -1,14 +1,18 @@
 
 #pragma once
 
+#include "utils.hpp"
+#include "window.hpp"
 #include <glm/vec2.hpp>
 #include <memory>
 
+
 struct Config {
-  glm::ivec2 WinSize;
-  float      Ratio = 0.75;
-  char       ScreenshotsPath[32] = "screenshots";
-  bool       Debug               = true;
+  glm::ivec2       WinSize;
+  float            Ratio           = 0.75;
+  uint             ScreenshotKey   = GLFW_KEY_F2;
+  std::string_view ScreenshotsPath = {"screenshots"};
+  bool             Debug           = true;
 };
 
 class IEngineState {
@@ -56,7 +60,7 @@ public:
 
   static void Destroy();
 
-  static glm::ivec2 GetScreenSize();
+  static glm::ivec2 ScreenSize();
 
 private:
 

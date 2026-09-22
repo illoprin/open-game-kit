@@ -1,5 +1,5 @@
 CXX=clang++
-CFLAGS=-Wall -std=c++23
+CFLAGS=-Wall -std=c++23 -O2
 LDFLAGS=-lglad -lglfw3dll -lstdc++exp
 
 INCLUDE=-Isrc -Ipkg/include

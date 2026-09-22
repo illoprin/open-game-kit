@@ -39,7 +39,7 @@ bool Window::Create(const glm::ivec2& size) {
   glfwSetWindowFocusCallback(handle, [](GLFWwindow*, int focused) {
     if (!focused) {
       w_last_grabbed = grabbed;
-      ToggleMouseGrab();
+      if (grabbed) ToggleMouseGrab();
     } else {
       if (w_last_grabbed) ToggleMouseGrab();
     }

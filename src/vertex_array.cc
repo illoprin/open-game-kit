@@ -1,8 +1,6 @@
 #include "vertex_array.hpp"
 #include "resource.hpp"
 
-GLuint VertexArray::vao_binding = 0;
-
 void VertexArray::SetAttribute(
   const Buffer&                 b,
   const std::vector<Attribute>& attrs
@@ -36,6 +34,7 @@ void VertexArray::SetAttribute(
 }
 
 void VertexArray::AttachIndexBuffer(const Buffer& buf) noexcept {
+  if (!id) return;
   if (buf.Target() != GL_ELEMENT_ARRAY_BUFFER) return;
 
   Bind();

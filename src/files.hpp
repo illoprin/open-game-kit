@@ -32,6 +32,7 @@ constexpr std::string_view TEXTURES_FOLDER = "textures";
 constexpr std::string_view MODELS_FOLDER   = "models";
 constexpr std::string_view SHADERS_FOLDER  = "shaders";
 constexpr std::string_view FONTS_FOLDER    = "fonts";
+constexpr std::string_view LEVELS_FOLDER    = "levels";
 
 inline std::string TexturePath(const std::string& file) {
   return fs::path{fs::path{ASSETS_FOLDER} / TEXTURES_FOLDER / file}.string();
@@ -39,6 +40,10 @@ inline std::string TexturePath(const std::string& file) {
 
 inline std::string FontPath(const std::string& file) {
   return fs::path{fs::path{ASSETS_FOLDER} / FONTS_FOLDER / file}.string();
+}
+
+inline std::string LevelPath(const std::string& file) {
+  return fs::path{fs::path{ASSETS_FOLDER} / LEVELS_FOLDER / file}.string();
 }
 
 inline std::string ShaderPath(const std::string& file) {

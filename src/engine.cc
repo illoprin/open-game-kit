@@ -1,14 +1,15 @@
 #include "engine.hpp"
+#include "clock.hpp"
 #include "gl_state.hpp"
 #include "input.hpp"
 #include "log.hpp"
-#include "window.hpp"
-#include "clock.hpp"
+#include "tools.hpp"
+
 
 std::unique_ptr<IEngineState> Engine::currentState(nullptr);
 bool                          Engine::created = false;
 glm::ivec2                    e_screenSize{0, 0};
-const Config* e_cfg = nullptr;
+const Config*                 e_cfg = nullptr;
 
 glm::ivec2 computeScreenSize(glm::ivec2 size, float r) {
   return {
@@ -33,8 +34,15 @@ bool Engine::Create(const Config* cfg) {
   og_assert(GL::CreateContext(), "Failed to create OpenGL 3.3 context");
 
   Window::SetResizeCallback([](int w, int h) {
-    e_screenSize = computeScreenSize({w,h}, e_cfg->Ratio);
+    e_screenSize = computeScreenSize({w, h}, e_cfg->Ratio);
     if (currentState) currentState->OnResize();
+    LOG_INFO(
+      "resized (Window: {} {}) (Screen: {} {})",
+      w,
+      h,
+      e_screenSize.x,
+      e_screenSize.y
+    );
   });
 
   // Register Input callbacks
@@ -70,8 +78,7 @@ bool Engine::Create(const Config* cfg) {
 
   Window::Center();
   Window::ShowAndFocus();
-  VertexArray::Unbind();
-  created = true;
+  created      = true;
   e_screenSize = computeScreenSize(Window::Size(), e_cfg->Ratio);
 
   return true;
@@ -101,11 +108,13 @@ void Engine::Run() {
     Clock::Update();
     Window::PollEvents();
 
+    if (Input::GetKeyPressed(e_cfg->ScreenshotKey))
+      ScreenshotTool::Needs = true;
+
     if (currentState) currentState->Update();
 
     if (t1.IsExpired()) {
       while (GL::PopError()) {}
-      std::println("FPS: {}", Clock::FPS());
     }
 
     if (t30.IsExpired()) {
@@ -122,6 +131,7 @@ void Engine::Run() {
     // except rendering to main buffer
     if (currentState) currentState->Render();
 
+    ScreenshotTool::Update(e_cfg->ScreenshotsPath);
     Window::SwapBuffers();
   }
 }
@@ -132,6 +142,6 @@ void Engine::Destroy() {
   Window::Destroy();
 }
 
-glm::ivec2 Engine::GetScreenSize() {
+glm::ivec2 Engine::ScreenSize() {
   return e_screenSize;
 }

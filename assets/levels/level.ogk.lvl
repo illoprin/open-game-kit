@@ -1,0 +1,15 @@
+# OpenGameKit Map Format
+
+# TEXTURE <id> <path>
+TEXTURE brick assets/textures/brick.png
+TEXTURE create assets/textures/crate.png
+
+# GEOMETRY <id> <geometry_path>
+
+
+# MATERIAL <diffuse_id | null> <emissive_id | null> <tint>
+
+
+# INSTANCE <proto_id> <material_id> <uv_scale> <pos> <scl> <rot>
+# INSTANCE cube brick (-1, 0, 1) (1, 1, 1) (0, 23, 0)
+# `proto_id` can be initial primitive `cube [-1..1]` `plane [-1..1]`
