@@ -53,7 +53,7 @@ public:
     // load map
 
     MapData md;
-    if (!md.LoadGameMap(LevelPath("bluearena150.ogk.map"))) {
+    if (!md.LoadGameMap(LevelPath("crimson_nexus.ogk.map"))) {
       log(LogLevel::Error, "failed load map");
       std::exit(1);
     };

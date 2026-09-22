@@ -145,13 +145,8 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
 
   log(
     LogLevel::Success,
-    "MapData: `{}` data loaded\n{{\n  Textures {}\n  Geometry {}\n  Instances "
-    "{}\n  Lights {}\n}}",
-    Name,
-    Textures.size(),
-    Geometries.size(),
-    Instances.size(),
-    Lights.size()
+    "MapData: `{}` data loaded",
+    Name
   );
 
   return true;

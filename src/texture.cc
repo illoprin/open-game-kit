@@ -1,4 +1,5 @@
 #include "texture.hpp"
+#include "log.hpp"
 #include "resource.hpp"
 
 // ----------------------------------------------------------------------
@@ -58,11 +59,13 @@ TextureFormatInfo GetTextureFormatInfo(GLenum internalFormat) {
 Texture::Texture()
     : Resource(), target(0), width(0), height(0), depth(0), internalFormat(0) {
   glGenTextures(1, &id);
+  log(LogLevel::Info, "texture id={} created", id);
 }
 
 Texture::~Texture() {
   if (id != 0) {
     glDeleteTextures(1, &id);
+    log(LogLevel::Info, "texture id={} destoyed", id);
     id = 0;
   }
 }

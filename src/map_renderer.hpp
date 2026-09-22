@@ -29,7 +29,8 @@ private:
     const Texture2D* texture = nullptr;
     float uvScale = 1.0;
     bool triplanar = false;
-    glm::mat4 model{1.0f};
+    glm::vec3 tint{1.f};
+    glm::mat4 model{1.f};
   };
 
   std::vector<RenderItem> renderItems;

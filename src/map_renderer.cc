@@ -1,11 +1,12 @@
 #include "map_renderer.hpp"
 #include "files.hpp"
+#include "geometry.hpp"
 #include "gl_state.hpp"
 #include "image.hpp"
-#include "geometry.hpp"
 #include "log.hpp"
 #include "transforms.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+
 
 bool MapRenderer::Initialize(const MapData& mapData) {
   // 1. Загрузка текстур
@@ -29,7 +30,12 @@ bool MapRenderer::Initialize(const MapData& mapData) {
   for (const auto& [id, path] : mapData.Geometries) {
     auto geoRes = Geometry::FromObj(path);
     if (!geoRes.has_value()) {
-      log(LogLevel::Error, "MapRenderer: failed to load model {}: {}", path, geoRes.error());
+      log(
+        LogLevel::Error,
+        "MapRenderer: failed to load model {}: {}",
+        path,
+        geoRes.error()
+      );
       return false;
     }
     meshes[id].FromGeometry(geoRes.value());
@@ -51,24 +57,31 @@ bool MapRenderer::Initialize(const MapData& mapData) {
     auto matIt = mapData.Materials.find(inst.MaterialID);
     if (matIt != mapData.Materials.end()) {
       auto texIt = textures.find(matIt->second.DiffuseID);
-      if (texIt != textures.end()) {
-        item.texture = &texIt->second;
-      }
+      if (texIt != textures.end()) { item.texture = &texIt->second; }
+      item.tint = matIt->second.Tint;
     }
 
     // create model matrix
-    item.model = CreateModel({
-      inst.position, inst.rotation, inst.scale,
+    item.model   = CreateModel({
+      inst.position,
+      inst.rotation,
+      inst.scale,
     });
     item.uvScale = inst.UVScaling;
 
     // set triplanar if flat primitive
-    if (inst.GeometryID == "cube" || inst.GeometryID == "plane") item.triplanar = true;
+    if (inst.GeometryID == "cube" || inst.GeometryID == "plane")
+      item.triplanar = true;
 
     renderItems.push_back(item);
   }
 
-  log(LogLevel::Info, "MapRenderer: initialized '{}' with {} instances.", mapData.Name, renderItems.size());
+  log(
+    LogLevel::Info,
+    "MapRenderer: initialized '{}' with {} instances.",
+    mapData.Name,
+    renderItems.size()
+  );
   return true;
 }
 
@@ -76,15 +89,20 @@ void MapRenderer::Render(const Program& program) const {
   for (const auto& item : renderItems) {
     if (!item.mesh) continue;
 
-    if (item.texture) {
-      item.texture->Bind(0);
-    }
-    
-    program.SetInt("u_use_triplanar",  static_cast<int>(item.triplanar));
+    program.SetInt("u_use_diffuse", static_cast<int>(item.texture == nullptr));
+    if (item.texture) { item.texture->Bind(0); }
+
+    program.SetInt("u_use_triplanar", static_cast<int>(item.triplanar));
 
     program.SetMat4("u_model", item.model);
     program.SetFloat("u_uv_scaling", item.uvScale);
 
-    GL::DrawElements(item.mesh->GetVAO(), item.mesh->GetIndexCount(), GL_UNSIGNED_INT);
+    program.SetVec3("u_tint", item.tint);
+
+    GL::DrawElements(
+      item.mesh->GetVAO(),
+      item.mesh->GetIndexCount(),
+      GL_UNSIGNED_INT
+    );
   }
 }

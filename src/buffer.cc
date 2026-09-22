@@ -1,8 +1,11 @@
 #include "buffer.hpp"
+#include "log.hpp"
 #include <utility>
 
 Buffer::Buffer(GLuint target) : target(target) {
   glGenBuffers(1, &id);
+
+  log(LogLevel::Info, "buffer id={} created", id);
 }
 
 Buffer::Buffer(GLuint target, size_t bufferSize) : target(target) {
@@ -41,6 +44,7 @@ Buffer& Buffer::operator =(Buffer&& other) noexcept {
 Buffer::~Buffer() {
   if (id != 0) {
     glDeleteBuffers(1, &id);
+    log(LogLevel::Info, "buffer id={} destroyed", id);
     id = 0;
   }
 }

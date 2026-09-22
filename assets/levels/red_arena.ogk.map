@@ -1,0 +1,147 @@
+NAME "Red Arena"
+# OpenGameKit Map Format
+NAME "Red Arena"
+
+# ============================================================================
+#  ASSETS
+# ============================================================================
+
+TEXTURE tiles      assets/textures/blue_tiles.png
+TEXTURE corrugate  assets/textures/corrugate.png
+TEXTURE concrete   assets/textures/gray_concrete.png
+TEXTURE crate      assets/textures/crate_128.png    # for crate model
+TEXTURE bricks     assets/textures/dark_bricks.png
+
+GEOMETRY crate     assets/models/crate.obj
+
+# ============================================================================
+#  MATERIALS
+# ============================================================================
+
+MATERIAL mat_tiles      tiles      NULL (1,1,1)
+MATERIAL mat_corrugate  corrugate  NULL (1,1,1)
+MATERIAL mat_concrete   concrete   NULL (1,1,1)
+MATERIAL mat_crate      crate      NULL (1,1,1)
+MATERIAL mat_bricks     bricks     NULL (1,1,1)
+
+# tinted variants - same textures, only the multiply color differs.
+# they give the arena its red read; delete them and swap the ids back to
+# mat_bricks / mat_corrugate if you want the neutral look.
+MATERIAL mat_bricks_red   bricks     NULL (1,0.42,0.38)
+MATERIAL mat_corr_red     corrugate  NULL (1,0.5,0.45)
+MATERIAL mat_trim_dark    concrete   NULL (0.35,0.36,0.4)
+
+# ============================================================================
+#  GEOMETRY
+# ============================================================================
+#  layout: 40 x 40 arena, X/Z in [-20..20], walls 8 units tall.
+#  center 20x20 is blue tile, the outer band is concrete.
+#  mirrored across X and Z, so both teams get identical cover.
+#
+#  INSTANCE <proto_id> <material_id> <uv_scale> <pos> <scl> <rot>
+
+# ---- floor -----------------------------------------------------------------
+INSTANCE plane mat_tiles     10.0 (0,0,0)     (10,1,10)   (0,0,0)
+INSTANCE plane mat_concrete   8.0 (0,0,-15)   (20,1,5)    (0,0,0)
+INSTANCE plane mat_concrete   8.0 (0,0,15)    (20,1,5)    (0,0,0)
+INSTANCE plane mat_concrete   8.0 (-15,0,0)   (5,1,10)    (0,0,0)
+INSTANCE plane mat_concrete   8.0 (15,0,0)    (5,1,10)    (0,0,0)
+
+# ---- perimeter walls -------------------------------------------------------
+INSTANCE cube mat_bricks_red  6.0 (0,4,-20.5) (20.5,4,0.5) (0,0,0)
+INSTANCE cube mat_bricks_red  6.0 (0,4,20.5)  (20.5,4,0.5) (0,0,0)
+INSTANCE cube mat_bricks_red  6.0 (-20.5,4,0) (0.5,4,20.5) (0,0,0)
+INSTANCE cube mat_bricks_red  6.0 (20.5,4,0)  (0.5,4,20.5) (0,0,0)
+
+# ---- corrugated band along the top of every wall ---------------------------
+INSTANCE cube mat_corrugate   8.0 (0,6.5,-19.8) (20,1.5,0.2) (0,0,0)
+INSTANCE cube mat_corrugate   8.0 (0,6.5,19.8)  (20,1.5,0.2) (0,0,0)
+INSTANCE cube mat_corrugate   8.0 (-19.8,6.5,0) (0.2,1.5,20) (0,0,0)
+INSTANCE cube mat_corrugate   8.0 (19.8,6.5,0)  (0.2,1.5,20) (0,0,0)
+
+# ---- concrete kick plate at the wall base ----------------------------------
+INSTANCE cube mat_trim_dark   4.0 (0,0.4,-19.6) (20,0.4,0.4) (0,0,0)
+INSTANCE cube mat_trim_dark   4.0 (0,0.4,19.6)  (20,0.4,0.4) (0,0,0)
+INSTANCE cube mat_trim_dark   4.0 (-19.6,0.4,0) (0.4,0.4,20) (0,0,0)
+INSTANCE cube mat_trim_dark   4.0 (19.6,0.4,0)  (0.4,0.4,20) (0,0,0)
+
+# ---- west platform (top at y=3) --------------------------------------------
+INSTANCE cube mat_concrete    4.0 (-14,1.5,0)   (5,1.5,7)   (0,0,0)
+INSTANCE cube mat_corr_red    3.0 (-9.1,1.5,0)  (0.1,1.5,7) (0,0,0)   # face panel
+INSTANCE cube mat_trim_dark   2.0 (-14,3.1,-7)  (5,0.1,0.2) (0,0,0)   # edge trim
+INSTANCE cube mat_trim_dark   2.0 (-14,3.1,7)   (5,0.1,0.2) (0,0,0)
+INSTANCE cube mat_concrete    2.0 (-6.75,0.5,0) (0.75,0.5,3) (0,0,0)  # step 1
+INSTANCE cube mat_concrete    2.0 (-8.25,1,0)   (0.75,1,3)   (0,0,0)  # step 2
+
+# ---- east platform (mirror) ------------------------------------------------
+INSTANCE cube mat_concrete    4.0 (14,1.5,0)    (5,1.5,7)   (0,0,0)
+INSTANCE cube mat_corr_red    3.0 (9.1,1.5,0)   (0.1,1.5,7) (0,0,0)
+INSTANCE cube mat_trim_dark   2.0 (14,3.1,-7)   (5,0.1,0.2) (0,0,0)
+INSTANCE cube mat_trim_dark   2.0 (14,3.1,7)    (5,0.1,0.2) (0,0,0)
+INSTANCE cube mat_concrete    2.0 (6.75,0.5,0)  (0.75,0.5,3) (0,0,0)
+INSTANCE cube mat_concrete    2.0 (8.25,1,0)    (0.75,1,3)   (0,0,0)
+
+# ---- corner pillars, they break line of sight across the diagonals ---------
+INSTANCE cube mat_corrugate   3.0 (-6,3,-6)   (1,3,1) (0,0,0)
+INSTANCE cube mat_corrugate   3.0 (6,3,-6)    (1,3,1) (0,0,0)
+INSTANCE cube mat_corrugate   3.0 (-6,3,6)    (1,3,1) (0,0,0)
+INSTANCE cube mat_corrugate   3.0 (6,3,6)     (1,3,1) (0,0,0)
+INSTANCE cube mat_bricks_red  2.0 (-6,6.2,-6) (1.2,0.2,1.2) (0,0,0)   # capital
+INSTANCE cube mat_bricks_red  2.0 (6,6.2,-6)  (1.2,0.2,1.2) (0,0,0)
+INSTANCE cube mat_bricks_red  2.0 (-6,6.2,6)  (1.2,0.2,1.2) (0,0,0)
+INSTANCE cube mat_bricks_red  2.0 (6,6.2,6)   (1.2,0.2,1.2) (0,0,0)
+
+# ---- center podium ---------------------------------------------------------
+INSTANCE cube mat_bricks      3.0 (0,0.35,0)  (3,0.35,3)   (0,0,0)
+INSTANCE cube mat_tiles       2.0 (0,0.72,0)  (2.4,0.02,2.4) (0,0,0)
+
+# ---- low brick cover, north and south ---------------------------------------
+INSTANCE cube mat_bricks      3.0 (0,0.9,-11)  (4,0.9,0.5) (0,0,0)
+INSTANCE cube mat_bricks      3.0 (0,0.9,11)   (4,0.9,0.5) (0,0,0)
+INSTANCE cube mat_bricks      3.0 (-13,0.9,-11) (3,0.9,0.5) (0,18,0)
+INSTANCE cube mat_bricks      3.0 (13,0.9,-11)  (3,0.9,0.5) (0,-18,0)
+INSTANCE cube mat_bricks      3.0 (-13,0.9,11)  (3,0.9,0.5) (0,-18,0)
+INSTANCE cube mat_bricks      3.0 (13,0.9,11)   (3,0.9,0.5) (0,18,0)
+
+# ---- crates ----------------------------------------------------------------
+# crate.obj is assumed 2x2x2 with the origin at its center, same convention as
+# the cube primitive -> a crate on the floor sits at y=1, a stacked one at y=3.
+# shift Y if your mesh is authored differently.
+INSTANCE crate mat_crate 1.0 (-10,1,-10) (1,1,1) (0,-22,0)
+INSTANCE crate mat_crate 1.0 (-10,3,-10) (1,1,1) (0,34,0)
+INSTANCE crate mat_crate 1.0 (-12.5,1,-8) (1,1,1) (0,8,0)
+INSTANCE crate mat_crate 1.0 (10,1,-10)  (1,1,1) (0,22,0)
+INSTANCE crate mat_crate 1.0 (10,3,-10)  (1,1,1) (0,-34,0)
+INSTANCE crate mat_crate 1.0 (12.5,1,-8) (1,1,1) (0,-8,0)
+INSTANCE crate mat_crate 1.0 (-10,1,10)  (1,1,1) (0,15,0)
+INSTANCE crate mat_crate 1.0 (-12.5,1,8) (1,1,1) (0,-40,0)
+INSTANCE crate mat_crate 1.0 (10,1,10)   (1,1,1) (0,-15,0)
+INSTANCE crate mat_crate 1.0 (12.5,1,8)  (1,1,1) (0,40,0)
+INSTANCE crate mat_crate 1.0 (-3,1,-15)  (1,1,1) (0,5,0)
+INSTANCE crate mat_crate 1.0 (3,1,-15)   (1,1,1) (0,-5,0)
+INSTANCE crate mat_crate 1.0 (0,1,-17)   (1,1,1) (0,45,0)
+INSTANCE crate mat_crate 1.0 (-3,1,15)   (1,1,1) (0,-5,0)
+INSTANCE crate mat_crate 1.0 (3,1,15)    (1,1,1) (0,5,0)
+INSTANCE crate mat_crate 1.0 (0,1,17)    (1,1,1) (0,-45,0)
+INSTANCE crate mat_crate 1.0 (-15,4,-4)  (1,1,1) (0,12,0)   # on west platform
+INSTANCE crate mat_crate 1.0 (-15,4,4)   (1,1,1) (0,-28,0)
+INSTANCE crate mat_crate 1.0 (15,4,-4)   (1,1,1) (0,-12,0)  # on east platform
+INSTANCE crate mat_crate 1.0 (15,4,4)    (1,1,1) (0,28,0)
+
+# ============================================================================
+#  LIGHTING
+# ============================================================================
+#  LIGHT <type> <pos> <intensity> <radius> <color> <direction | null>
+
+LIGHT directional (0,50,-30) 1.2 1000.0 (1,0.95,0.9) (-0.3,-1,0.5)
+
+LIGHT point (0,14,0)     0.9 26.0 (0.88,0.92,1)    NULL   # center, cool
+LIGHT point (-14,6,0)    0.7 16.0 (1,0.62,0.55)    NULL   # west platform, red
+LIGHT point (14,6,0)     0.7 16.0 (1,0.62,0.55)    NULL   # east platform, red
+LIGHT point (-15,5,-15)  0.5 14.0 (1,0.9,0.8)      NULL
+LIGHT point (15,5,-15)   0.5 14.0 (1,0.9,0.8)      NULL
+LIGHT point (-15,5,15)   0.5 14.0 (1,0.9,0.8)      NULL
+LIGHT point (15,5,15)    0.5 14.0 (1,0.9,0.8)      NULL
+LIGHT point (0,2.2,0)    0.6 7.0  (0.75,0.85,1)    NULL   # podium glow
+LIGHT point (0,3,-16)    0.4 9.0  (1,0.72,0.62)    NULL
+LIGHT point (0,3,16)     0.4 9.0  (1,0.72,0.62)    NULL

@@ -5,7 +5,6 @@
 #include "log.hpp"
 #include "tools.hpp"
 
-
 std::unique_ptr<IEngineState> Engine::currentState(nullptr);
 bool                          Engine::created = false;
 glm::ivec2                    e_screenSize{0, 0};
@@ -81,6 +80,8 @@ bool Engine::Create(const Config* cfg) {
   created      = true;
   e_screenSize = computeScreenSize(Window::Size(), e_cfg->Ratio);
 
+  log(LogLevel::Info, "Engine initialized");
+
   return true;
 }
 
@@ -140,6 +141,7 @@ void Engine::Destroy() {
   if (!created) return;
   if (currentState) currentState.reset();
   Window::Destroy();
+  log(LogLevel::Info, "Engine destoyed");
 }
 
 glm::ivec2 Engine::ScreenSize() {

@@ -6,7 +6,9 @@ in vec3 normal;
 
 uniform sampler2D u_diffuse;
 uniform bool u_use_triplanar = false;
+uniform bool u_use_diffuse = false;
 uniform float u_uv_scaling = 1.0;
+uniform vec3 u_tint = vec3(1.0);
 
 out vec4 out_fragcolor;
 
@@ -22,12 +24,19 @@ vec3 TriplanarUV(vec3 pos, vec3 normal, float scale) {
 }
 
 void main() {
+
+  if (u_use_diffuse) {
+    out_fragcolor = vec4(u_tint, 1.0);
+    return;
+  }
+
   if (u_use_triplanar) {
     vec3 out_color = TriplanarUV(world_pos, normal, u_uv_scaling);
     out_fragcolor = vec4(out_color, 1.0);
   } else {
     vec4 out_color = texture(u_diffuse, texcoord);
-    if (out_color.a < 0.1) discard;
+    if (out_color.a < 0.1)
+      discard;
     out_fragcolor = out_color;
   }
 }
