@@ -17,52 +17,52 @@ MATERIAL mat_bricks bricks NULL (1,1,1)
 # --- OUTER WALLS (Boundary 150 units) ---
 # Walls are 10 units high, 2 units thick. Inner space is 148x148.
 # North Wall
-INSTANCE cube mat_bricks 4.0 (0,5,-76) (75,5,1) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (0,5,-76) (75,5,1) (0,0,0)
 # South Wall
-INSTANCE cube mat_bricks 4.0 (0,5,76) (75,5,1) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (0,5,76) (75,5,1) (0,0,0)
 # West Wall
-INSTANCE cube mat_bricks 4.0 (-76,5,0) (1,5,75) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (-76,5,0) (1,5,75) (0,0,0)
 # East Wall
-INSTANCE cube mat_bricks 4.0 (76,5,0) (1,5,75) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (76,5,0) (1,5,75) (0,0,0)
 
 # --- FLOOR ---
 # Main floor slightly below zero to prevent z-fighting with walls
-INSTANCE plane mat_tiles 30.0 (0,-0.1,0) (75,1,75) (0,0,0)
+INSTANCE plane mat_tiles 1.0 (0,-0.1,0) (75,1,75) (0,0,0)
 
 # --- ELEVATIONS & PLATFORMS ---
 
 # Central Raised Platform (Tiered)
 # Base tier
-INSTANCE cube mat_concrete 8.0 (0,1,0) (20,1,20) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (0,1,0) (20,1,20) (0,0,0)
 # Upper tier
-INSTANCE cube mat_concrete 6.0 (0,3,0) (12,1,12) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (0,3,0) (12,1,12) (0,0,0)
 # Top platform surface
-INSTANCE plane mat_corrugate 4.0 (0,4.01,0) (6,1,6) (0,0,0)
+INSTANCE plane mat_corrugate 1.0 (0,4.01,0) (6,1,6) (0,0,0)
 
 # NW Corner Elevated Bunker Area
-INSTANCE cube mat_concrete 5.0 (-45,2,-45) (18,2,18) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (-45,2,-45) (18,2,18) (0,0,0)
 INSTANCE plane mat_corrugate 3.0 (-45,4.01,-45) (9,1,9) (0,0,0)
 # Ramp to NW bunker (stair-step approximation using cubes)
-INSTANCE cube mat_concrete 2.0 (-32,0.5,-32) (4,0.5,4) (0,0,0)
-INSTANCE cube mat_concrete 2.0 (-36,1.5,-36) (4,0.5,4) (0,0,0)
-INSTANCE cube mat_concrete 2.0 (-40,2.5,-40) (4,0.5,4) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (-32,0.5,-32) (4,0.5,4) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (-36,1.5,-36) (4,0.5,4) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (-40,2.5,-40) (4,0.5,4) (0,0,0)
 
 # SE Corner Symmetric Bunker Area
-INSTANCE cube mat_concrete 5.0 (45,2,45) (18,2,18) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (45,2,45) (18,2,18) (0,0,0)
 INSTANCE plane mat_corrugate 3.0 (45,4.01,45) (9,1,9) (0,0,0)
 # Ramp to SE bunker
-INSTANCE cube mat_concrete 2.0 (32,0.5,32) (4,0.5,4) (0,0,0)
-INSTANCE cube mat_concrete 2.0 (36,1.5,36) (4,0.5,4) (0,0,0)
-INSTANCE cube mat_concrete 2.0 (40,2.5,40) (4,0.5,4) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (32,0.5,32) (4,0.5,4) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (36,1.5,36) (4,0.5,4) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (40,2.5,40) (4,0.5,4) (0,0,0)
 
 # NE Long Elevated Walkway
-INSTANCE cube mat_concrete 3.0 (40,1.5,-40) (6,1.5,25) (0,0,0)
+INSTANCE cube mat_concrete 1.0 (40,1.5,-40) (6,1.5,25) (0,0,0)
 INSTANCE plane mat_corrugate 2.0 (40,3.01,-40) (3,1,12.5) (0,0,0)
 
 # SW Cover Blocks (ground level obstacles)
-INSTANCE cube mat_bricks 2.0 (-40,1.5,30) (3,1.5,3) (0,0,0)
-INSTANCE cube mat_bricks 2.0 (-30,1.5,40) (3,1.5,3) (0,0,0)
-INSTANCE cube mat_bricks 2.0 (-50,1.5,50) (3,1.5,3) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (-40,1.5,30) (3,1.5,3) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (-30,1.5,40) (3,1.5,3) (0,0,0)
+INSTANCE cube mat_bricks 1.0 (-50,1.5,50) (3,1.5,3) (0,0,0)
 
 # --- CRATE PROPS ---
 # Crates placed strategically for cover and visual interest

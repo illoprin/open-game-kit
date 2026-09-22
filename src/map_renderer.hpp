@@ -28,6 +28,7 @@ private:
     const Mesh* mesh = nullptr;
     const Texture2D* texture = nullptr;
     float uvScale = 1.0;
+    bool triplanar = false;
     glm::mat4 model{1.0f};
   };
 

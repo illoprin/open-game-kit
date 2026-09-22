@@ -62,6 +62,9 @@ bool MapRenderer::Initialize(const MapData& mapData) {
     });
     item.uvScale = inst.UVScaling;
 
+    // set triplanar if flat primitive
+    if (inst.GeometryID == "cube" || inst.GeometryID == "plane") item.triplanar = true;
+
     renderItems.push_back(item);
   }
 
@@ -76,6 +79,8 @@ void MapRenderer::Render(const Program& program) const {
     if (item.texture) {
       item.texture->Bind(0);
     }
+    
+    program.SetInt("u_use_triplanar",  static_cast<int>(item.triplanar));
 
     program.SetMat4("u_model", item.model);
     program.SetFloat("u_uv_scaling", item.uvScale);
