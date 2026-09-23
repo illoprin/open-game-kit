@@ -77,13 +77,14 @@ public:
     return body.is_grounded;
   }
 
+  Config Cfg;
+
 private:
 
   void ResolveCollisions(std::span<const StaticCollider> colliders);
   void ApplyMovementInput(float dt);
 
   PlayerBody body;
-  Config     config;
   glm::vec3  input_dir{0.0f};  // Movement input direction (WASD)
   glm::vec3  front{0, 0, 1};
   bool       want_jump = false;

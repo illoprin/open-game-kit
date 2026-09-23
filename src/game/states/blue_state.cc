@@ -24,6 +24,8 @@ uint indices[] = {
 };
 
 BlueState::BlueState() : gBuffer(Engine::ScreenSize()) {
+  fps.SetPosition(glm::vec3{0, 15, 0});
+  fps.Cfg.mouse_sens = 0.08;
 
   // load map file
   MapData md;
@@ -72,8 +74,8 @@ void BlueState::Update() noexcept {
   if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) Window::ToggleMouseGrab();
 
   if (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1)) {
-    fps.ProcessInput();
     fps.UpdateLook(cam);
+    fps.ProcessInput();
   }
 
   fps.ApplyToCamera(cam);

@@ -7,7 +7,8 @@ GLFWwindow*            Window::handle         = nullptr;
 Window::ResizeCallback Window::resizeCallback = nullptr;
 bool                   Window::created        = false;
 bool                   Window::grabbed        = false;
-bool w_last_grabbed;
+bool wLastGrabbed = false;
+bool wRawInputSupport = false;
 
 bool Window::Create(const glm::ivec2& size) {
   if (created) return false;
@@ -38,12 +39,14 @@ bool Window::Create(const glm::ivec2& size) {
 
   glfwSetWindowFocusCallback(handle, [](GLFWwindow*, int focused) {
     if (!focused) {
-      w_last_grabbed = grabbed;
+      wLastGrabbed = grabbed;
       if (grabbed) ToggleMouseGrab();
     } else {
-      if (w_last_grabbed) ToggleMouseGrab();
+      if (wLastGrabbed) ToggleMouseGrab();
     }
   });
+
+  wRawInputSupport = glfwRawMouseMotionSupported() ? true : false;
 
   created = true;
 
@@ -85,8 +88,10 @@ void Window::ToggleMouseGrab() {
   grabbed = !grabbed;
   if (grabbed) {
     glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (wRawInputSupport) glfwSetInputMode(handle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
   } else {
     glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    if (wRawInputSupport) glfwSetInputMode(handle, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
   }
 }
 

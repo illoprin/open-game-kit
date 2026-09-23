@@ -1,5 +1,5 @@
-#include "core/log.hpp"
 #include "core/engine.hpp"
+#include "core/log.hpp"
 #include "game/states/blue_state.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
