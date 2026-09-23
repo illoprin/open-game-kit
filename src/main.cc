@@ -1,16 +1,16 @@
-#include "camera.hpp"
-#include "engine.hpp"
-#include "files.hpp"
-#include "fly_controller.hpp"
-#include "input.hpp"
-#include "log.hpp"
-#include "map_parser.hpp"
-#include "map_renderer.hpp"
-#include "program.hpp"
-#include "utils.hpp"
-#include "window.hpp"
-#include <glm/vec3.hpp>
 
+#include "core./log.hpp"
+#include "core/input.hpp"
+#include "core/files.hpp"
+#include "core/utils.hpp"
+#include "game/fly_controller.hpp"
+#include "core/engine.hpp"
+#include "gfx/gl.hpp"
+#include "gfx/program.hpp"
+#include "gfx/render_target.hpp"
+#include "world/map_renderer.hpp"
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -35,6 +35,9 @@ uint indices[] = {
 };
 
 class BlueState : public IEngineState {
+
+  GBuffer gBuffer;
+
   Program     pMain;
   MapRenderer mr;
 
@@ -43,7 +46,7 @@ class BlueState : public IEngineState {
 
 public:
 
-  BlueState() {
+  BlueState() : gBuffer(Engine::ScreenSize()) {
     // setup controller
 
     controller.SetMaxSpeed(20.0);
@@ -82,6 +85,10 @@ public:
     log(LogLevel::Info, "blue state enter");
   }
 
+  void OnResize() noexcept override {
+    gBuffer.Resize(Engine::ScreenSize());
+  }
+
   void Update() noexcept override {
 
     if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) Window::ToggleMouseGrab();
@@ -93,20 +100,33 @@ public:
 
   void Render() noexcept override {
 
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // glDrawBuffer(GL_BACK);
+    // bind GBuffer for drawing
 
-    // clear framebuffer
-    auto size = Window::Size();
-    glViewport(0, 0, size.x, size.y);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gBuffer.BindForDrawing(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     pMain.Use();
     pMain.SetMat4("u_projection", cam.GetProjection());
     pMain.SetMat4("u_view", cam.GetView());
     pMain.SetInt("u_diffuse", 0);
 
+    // render scene
+
     mr.Render(pMain);
+
+    // blit framebuffer to screen
+
+    GLuint     bufferId   = gBuffer.GetFramebuffer().ID();
+    glm::ivec2 bufferSize = gBuffer.Size();
+    glm::ivec2 windowSize = Window::Size();
+
+    GL::BlitFramebuffer(
+      bufferId,
+      0,
+      GL_COLOR_ATTACHMENT0,
+      GL_BACK,
+      bufferSize,
+      windowSize
+    );
   }
 
   ~BlueState() override {
