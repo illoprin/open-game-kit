@@ -10,7 +10,6 @@ void Camera3D::Update(glm::ivec2 screen_size) {
   float yaw   = glm::radians(this->Rotation.y);
   float roll  = glm::radians(this->Rotation.z);
 
-
   // compute front
   glm::vec3 f = {cosf(pitch) * cosf(yaw), sinf(pitch), sinf(yaw) * cosf(pitch)};
   front       = glm::normalize(f);

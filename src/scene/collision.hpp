@@ -4,6 +4,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <span>
 
 struct AABB {
   glm::vec3 min{0.f, 0.f, 0.f};
@@ -47,6 +48,12 @@ struct Frustum {
     float            zFar,
     const glm::mat4& viewMatrix
   );
+};
+
+struct StaticCollider {
+  AABB   BoxBounds;
+  Sphere SphereBounds;
+  // optional: material id for steps sound
 };
 
 namespace Collision {

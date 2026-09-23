@@ -18,6 +18,16 @@ public:
   Image2D(uint width, uint height, uint comps);
   Image2D(uint width, uint height, uint comps, const std::vector<uch>& data);
 
+  // Copy and move
+
+  Image2D(Image2D&&) = default;
+  Image2D& operator=(Image2D&&) = default;
+
+  Image2D(const Image2D&) = default;
+  Image2D& operator=(const Image2D&) = default;
+
+  // Functions
+
   void SetPixel(uint x, uint y, const std::vector<uch>& pixelData);
   bool WriteFile(const std::string& filepath, bool flip_y = true) const;
   bool FromFile(const std::string& filepath);

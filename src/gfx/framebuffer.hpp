@@ -30,6 +30,6 @@ public:
   void SetDrawBuffers(const std::vector<GLenum>& buffers);
 
   // Проверка статуса готовности
-  bool IsComplete() const;
+  [[nodiscard]] bool IsComplete() const;
 
 };

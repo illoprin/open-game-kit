@@ -1,4 +1,6 @@
 #include "collision.hpp"
+#include "glm/geometric.hpp"
+#include "scene/geometry.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -69,6 +71,8 @@ Frustum Frustum::FromPerspective(
   return frustum;
 }
 
+namespace Collision {
+
 bool Intersect(const AABB& a, const AABB& b) {
   return (a.min.x <= b.max.x && a.max.x >= b.min.x)
          && (a.min.y <= b.max.y && a.max.y >= b.min.y)
@@ -124,3 +128,6 @@ bool Intersect(const AABB& aabb, const Capsule& capsule) {
   };
   return Intersect(expanded, Line{capsule.a, capsule.b});
 }
+
+
+}  // namespace Collision

@@ -48,9 +48,9 @@ public:
 class Engine {
 public:
 
-  static bool Create(const Config*);
+  [[nodiscard]] static bool Create(const Config*);
 
-  static bool Created() {
+  [[nodiscard]] static bool Created() {
     return created;
   }
 

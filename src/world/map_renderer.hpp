@@ -4,6 +4,7 @@
 #include "gfx/mesh.hpp"
 #include "gfx/texture.hpp"
 #include "gfx/program.hpp"
+#include "world/map_repository.hpp"
 #include <unordered_map>
 #include <string>
 
@@ -12,10 +13,10 @@ public:
   MapRenderer() = default;
   ~MapRenderer() = default;
 
-  // Инициализация, загрузка текстур и геометрий по данным карты
-  bool Initialize(const MapData& mapData);
+  // init gpu objects and render items from Map Data and Loaded Assets
+  void Init(const MapData&, const MapRepository&) noexcept;
 
-  // Отрисовка всех инстансов карты
+  // Render all map items
   void Render(const Program& program) const;
 
   MapRenderer(const MapRenderer&) = delete;
@@ -24,6 +25,7 @@ public:
   MapRenderer& operator=(MapRenderer&&) noexcept = default;
 
 private:
+  // RenderItem represents each instance view
   struct RenderItem {
     const Mesh* mesh = nullptr;
     const Texture2D* texture = nullptr;
@@ -35,7 +37,7 @@ private:
 
   std::vector<RenderItem> renderItems;
   
-  // Кэш ресурсов, чтобы не дублировать загрузку
+  // GPU resources
   std::unordered_map<std::string, Texture2D> textures;
   std::unordered_map<std::string, Mesh>      meshes;
 };

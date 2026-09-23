@@ -11,22 +11,22 @@ public:
 
   using ResizeCallback = std::function<void(int width, int height)>;
 
-  static bool Create(const glm::ivec2& size);
+  [[nodiscard]] static bool Create(const glm::ivec2& size);
   static void Destroy();
 
   static void Center();
   static void ShowAndFocus();
   static void ToggleMouseGrab();
 
-  static bool ShouldClose();
+  [[nodiscard]] static bool ShouldClose();
   static void PollEvents();
   static void SwapBuffers();
 
   static void SetResizeCallback(ResizeCallback callback);
 
-  static glm::ivec2  Size();
-  static GLFWwindow* Handle();  // GLFWwindow* pointer
-  static bool Grabbed();
+  [[nodiscard]] static glm::ivec2  Size();
+  [[nodiscard]] static GLFWwindow* Handle();  // GLFWwindow* pointer
+  [[nodiscard]] static bool Grabbed();
 
 private:
 

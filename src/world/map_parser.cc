@@ -7,8 +7,6 @@
 #include <sstream>
 #include <stdexcept>
 
-// Предполагается, что заголовки glm и структуры уже подключены
-
 bool MapData::LoadGameMap(const std::string& filepath) noexcept {
   uint line_num = 0;
   try {
@@ -34,7 +32,6 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
       std::string clean = s;
 
       // Заменяем скобки и запятые на пробелы, чтобы stringstream всё легко
-      // прочитал
       for (char& c : clean) {
         if (c == '(' || c == ')' || c == ',') { c = ' '; }
       }

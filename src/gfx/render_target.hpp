@@ -23,13 +23,13 @@ public:
     if (clear) { glClear(clear); }
   }
 
-  bool CanUpdateSize(glm::ivec2 new_size) noexcept {
+  [[nodiscard]] bool CanUpdateSize(glm::ivec2 new_size) noexcept {
     if (new_size.x < 1 || new_size.y < 1 || new_size == size) return false;
     size = new_size;
     return true;
   }
 
-  glm::ivec2 Size() const noexcept {
+  [[nodiscard]] glm::ivec2 Size() const noexcept {
     return size;
   }
 

@@ -1,60 +1,42 @@
 #include "map_renderer.hpp"
 
-#include "core/files.hpp"
-#include "scene/geometry.hpp"
-#include "gfx/gl.hpp"
-#include "gfx/image.hpp"
 #include "core/log.hpp"
+#include "gfx/gl.hpp"
 #include "scene/transforms.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 
-bool MapRenderer::Initialize(const MapData& mapData) {
-  // 1. Загрузка текстур
-  Image2D img;
-  for (const auto& [id, path] : mapData.Textures) {
-    if (!img.FromFile(path)) {
-      log(LogLevel::Error, "MapRenderer: failed to load texture: {}", path);
-      return false;
-    }
+void MapRenderer::Init(
+  const MapData&       mapData,
+  const MapRepository& repository
+) noexcept {
+  // 1. Upload textures to GPU using pre-loaded images from MapRepository
+  for (const auto& [id, img] : repository.Images) {
     Texture2D& tex = textures[id];
     tex.FromData(img.Pix(), img.Width(), img.Height(), GL_RGB8);
     tex.GenerateMipmaps();
     tex.SetSamplerState(GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_LINEAR);
   }
 
-  // 2. Загрузка геометрии (включая внешние .obj и дефолтный cube)
-  // Создадим дефолтный куб единичного размера [-1..1] или под размер
-  meshes["cube"].FromGeometry(Geometry::CreateCube(glm::vec3(2.0f)));
-  meshes["plane"].FromGeometry(Geometry::CreatePlane(glm::vec3(2.0f)));
-
-  for (const auto& [id, path] : mapData.Geometries) {
-    auto geoRes = Geometry::FromObj(path);
-    if (!geoRes.has_value()) {
-      log(
-        LogLevel::Error,
-        "MapRenderer: failed to load model {}: {}",
-        path,
-        geoRes.error()
-      );
-      return false;
-    }
-    meshes[id].FromGeometry(geoRes.value());
+  // 2. Upload geometries to GPU meshes from MapRepository
+  for (const auto& [id, geo] : repository.Geometries) {
+    meshes[id].FromGeometry(geo);
   }
 
-  // 3. Подготовка RenderItem'ов для быстрого рендеринга инстансов
+  // 3. Prepare RenderItems for fast instance rendering
   for (const auto& inst : mapData.Instances) {
     RenderItem item;
 
-    // Находим меш (по умолчанию если геометрия не найдена, пробуем "cube")
+    // Find mesh (fallback to "cube" if geometry ID is not found)
     auto meshIt = meshes.find(inst.GeometryID);
     if (meshIt != meshes.end()) {
       item.mesh = &meshIt->second;
     } else {
-      item.mesh = &meshes["cube"];
+      auto cubeIt = meshes.find("cube");
+      if (cubeIt != meshes.end()) { item.mesh = &cubeIt->second; }
     }
 
-    // Находим текстуру через материалы
+    // Find texture through materials
     auto matIt = mapData.Materials.find(inst.MaterialID);
     if (matIt != mapData.Materials.end()) {
       auto texIt = textures.find(matIt->second.DiffuseID);
@@ -62,7 +44,7 @@ bool MapRenderer::Initialize(const MapData& mapData) {
       item.tint = matIt->second.Tint;
     }
 
-    // create model matrix
+    // Create model matrix
     item.model   = CreateModel({
       inst.position,
       inst.rotation,
@@ -70,9 +52,10 @@ bool MapRenderer::Initialize(const MapData& mapData) {
     });
     item.uvScale = inst.UVScaling;
 
-    // set triplanar if flat primitive
-    if (inst.GeometryID == "cube" || inst.GeometryID == "plane")
+    // Set triplanar if flat primitive
+    if (inst.GeometryID == "cube" || inst.GeometryID == "plane") {
       item.triplanar = true;
+    }
 
     renderItems.push_back(item);
   }
@@ -83,7 +66,6 @@ bool MapRenderer::Initialize(const MapData& mapData) {
     mapData.Name,
     renderItems.size()
   );
-  return true;
 }
 
 void MapRenderer::Render(const Program& program) const {
