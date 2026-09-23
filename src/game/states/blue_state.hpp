@@ -3,6 +3,7 @@
 #include "core/engine.hpp"
 #include "game/fps_controller.hpp"
 #include "game/physics.hpp"
+#include "game/physics_debug_renderer.hpp"
 #include "gfx/program.hpp"
 #include "gfx/render_target.hpp"
 #include "world/map_renderer.hpp"
@@ -14,6 +15,7 @@ class BlueState : public IEngineState {
 
   MapRenderer  mRenderer;
   PhysicsWorld phys;
+  PhysicsDebugRenderer physRenderer;
 
   FPSController fps;
   Camera3D      cam;

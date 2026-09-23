@@ -27,16 +27,18 @@ void GL::DrawElements(
   const VertexArray& vao,
   uint               count,
   GLuint             data_type,
-  uint               instances
+  uint               instances,
+  GLenum mode
 ) noexcept {
   vao.Bind();
   if (instances > 1)
-    glDrawElementsInstanced(GL_TRIANGLES, count, data_type, nullptr, instances);
+    glDrawElementsInstanced(mode, count, data_type, nullptr, instances);
   else
-    glDrawElements(GL_TRIANGLES, count, data_type, nullptr);
+    glDrawElements(mode, count, data_type, nullptr);
 
   stats.DrawCalls += 1;
   stats.Triangles += count / 3;
+  VertexArray::Unbind();
 }
 
 const RenderStats& GL::GetStats() {

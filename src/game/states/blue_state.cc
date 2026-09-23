@@ -1,4 +1,5 @@
 #include "blue_state.hpp"
+#include "GLFW/glfw3.h"
 #include "core./log.hpp"
 #include "core./utils.hpp"
 
@@ -6,6 +7,8 @@
 #include "core/input.hpp"
 #include "gfx/gl.hpp"
 #include "world/map_repository.hpp"
+
+bool showColliders = false;
 
 glm::vec2 vertices[] = {
   {-0.5f, -0.5f}, // 0: Bottom-left
@@ -73,6 +76,8 @@ void BlueState::Update() noexcept {
 
   if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) Window::ToggleMouseGrab();
 
+  if (Input::GetKeyPressed(GLFW_KEY_F3)) showColliders = !showColliders;
+
   if (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1)) {
     fps.UpdateLook(cam);
     fps.ProcessInput();
@@ -100,6 +105,8 @@ void BlueState::Render() noexcept {
   // render scene
 
   mRenderer.Render(pMain);
+  if (showColliders)
+    physRenderer.DrawStaticColliders(phys.StaticColliders(), cam);
 
   // blit framebuffer to screen
 

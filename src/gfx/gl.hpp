@@ -36,7 +36,8 @@ public:
     const VertexArray&,
     uint   count,
     GLuint data_type,
-    uint   instances = 1
+    uint   instances = 1,
+    GLenum mode = GL_TRIANGLES
   ) noexcept;
 
   static const RenderStats& GetStats();
