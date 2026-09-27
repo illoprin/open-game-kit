@@ -1,27 +1,47 @@
-CXX=clang++
-CFLAGS=-Wall -std=c++23 -O2
-LDFLAGS=-limgui -lglad -lglfw3dll -lstdc++exp
+CXX = clang++
+COMMON_FLAGS = -Wall -std=c++23
+INCLUDE = -Isrc -Ipkg/include
+LIBS = -Lpkg/lib
+LDFLAGS = -limgui -lglad -lglfw3dll -lstdc++exp
 
-INCLUDE=-Isrc -Ipkg/include
-LIBS=-Lpkg/lib
-
-SRC_DIR=src
+SRC_DIR = src
 SRCS = $(shell find $(SRC_DIR) -name "*.cc")
-OBJS = $(patsubst $(SRC_DIR)/%.cc, $(OBJ_DIR)/%.o, $(SRCS))
 
-BUILD_DIR=build
-OBJ_DIR=$(BUILD_DIR)/obj
+DEBUG_DIR = build/debug
+RELEASE_DIR = build/release
 
-TARGET=$(BUILD_DIR)/app.exe
+DEBUG_OBJS = $(patsubst $(SRC_DIR)/%.cc,$(DEBUG_DIR)/obj/%.o,$(SRCS))
+RELEASE_OBJS = $(patsubst $(SRC_DIR)/%.cc,$(RELEASE_DIR)/obj/%.o,$(SRCS)) \
+               $(RELEASE_DIR)/resources.res.o
 
-all: $(TARGET)
-	cp pkg/lib/*.dll $(BUILD_DIR)
+.PHONY: all debug release clean
+all: debug
+
+debug: $(DEBUG_DIR)/app.exe
+	cp pkg/lib/*.dll $(DEBUG_DIR)
 	./$<
 
-$(TARGET): $(OBJS)
-	@mkdir -p $(dir $@)
-	$(CXX) $(CFLAGS) $^ $(INCLUDE) $(LIBS) -o $@ $(LDFLAGS)
+release: $(RELEASE_DIR)/app.exe
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
+$(DEBUG_DIR)/app.exe: $(DEBUG_OBJS)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CFLAGS) $(INCLUDE) -c $< -o $@
+	$(CXX) $(COMMON_FLAGS) -O0 -g $^ $(INCLUDE) $(LIBS) -o $@ $(LDFLAGS)
+
+$(RELEASE_DIR)/app.exe: $(RELEASE_OBJS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(COMMON_FLAGS) -O2 $^ $(INCLUDE) $(LIBS) -o $@ $(LDFLAGS)
+
+$(DEBUG_DIR)/obj/%.o: $(SRC_DIR)/%.cc
+	@mkdir -p $(dir $@)
+	$(CXX) $(COMMON_FLAGS) -O0 -g $(INCLUDE) -c $< -o $@
+
+$(RELEASE_DIR)/obj/%.o: $(SRC_DIR)/%.cc
+	@mkdir -p $(dir $@)
+	$(CXX) $(COMMON_FLAGS) -O2 $(INCLUDE) -c $< -o $@
+
+$(RELEASE_DIR)/resources.res.o: resources.rc
+	@mkdir -p $(dir $@)
+	windres $< -o $@
+
+clean:
+	rm -rf build

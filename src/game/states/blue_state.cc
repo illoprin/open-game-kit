@@ -1,5 +1,5 @@
 #include "blue_state.hpp"
-#include "GLFW/glfw3.h"
+
 #include "core./log.hpp"
 #include "core./utils.hpp"
 
@@ -9,7 +9,6 @@
 #include "game/initial_ui.hpp"
 #include "gfx/gl.hpp"
 #include "world/map_repository.hpp"
-#include <GL/gl.h>
 #include <array>
 
 bool showColliders = false;
@@ -71,10 +70,8 @@ void BlueState::OnResize() noexcept {
 
 void BlueState::Update() noexcept {
 
-  if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) {
-    InitialUI::SetWantCaptureInput(false);
-    Window::ToggleMouseGrab();
-  }
+  if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) Window::ToggleMouseGrab();
+  if (Window::Grabbed()) InitialUI::SetWantCaptureInput(false);
 
   if (Input::GetKeyPressed(GLFW_KEY_F3)) showColliders = !showColliders;
 

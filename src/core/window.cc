@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "gfx/image.hpp"
 #include "log.hpp"
 #include "window.hpp"
 
@@ -75,6 +76,35 @@ void Window::Center() {
     (mode->height - height) / 2
   );
 }
+
+
+bool Window::SetIcons() {
+  if (!created || !handle) return false;
+
+  Image2D icon16;
+  Image2D icon32;
+  if (!icon16.FromFile("assets/favicon-16x16.png", false) ||
+      !icon32.FromFile("assets/favicon-32x32.png", false)) {
+    log(LogLevel::Error, "Failed to load window icons");
+    return false;
+  }
+
+  if (icon16.Comps() != 4 || icon32.Comps() != 4) {
+    log(LogLevel::Error, "Window icons must be RGBA images");
+    return false;
+  }
+
+  GLFWimage icons[] = {
+    {static_cast<int>(icon16.Width()), static_cast<int>(icon16.Height()),
+     const_cast<unsigned char*>(icon16.Pix())},
+    {static_cast<int>(icon32.Width()), static_cast<int>(icon32.Height()),
+     const_cast<unsigned char*>(icon32.Pix())}
+  };
+
+  glfwSetWindowIcon(handle, 2, icons);
+  return true;
+}
+
 
 void Window::ShowAndFocus() {
   if (!created || !handle) return;

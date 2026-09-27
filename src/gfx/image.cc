@@ -46,7 +46,7 @@ bool Image2D::WriteFile(const std::string& filepath, bool flip_y) const {
          != 0;
 }
 
-bool Image2D::FromFile(const std::string& filepath) {
+bool Image2D::FromFile(const std::string& filepath, bool flipY) {
   int            w, h, c;
   unsigned char* rawData = stbi_load(filepath.c_str(), &w, &h, &c, 0);
   if (!rawData) return false;
@@ -57,8 +57,11 @@ bool Image2D::FromFile(const std::string& filepath) {
 
   pix.resize(width * height * comps);
 
-  // Apply FillFlipped if the raw data needs to be stored y-mirrored in
-  FillFlipped(pix.data(), rawData, width, height, comps);
+  if (flipY)
+    // Apply FillFlipped if the raw data needs to be stored y-mirrored in
+    FillFlipped(pix.data(), rawData, width, height, comps);
+  else
+    std::memcpy(pix.data(), rawData, width * height * comps);
 
   stbi_image_free(rawData);
   return true;

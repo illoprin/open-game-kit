@@ -1,6 +1,7 @@
 #include "engine.hpp"
 #include "clock.hpp"
 #include "core./input.hpp"
+#include "core./log.hpp"
 #include "core./window.hpp"
 #include "game/initial_ui.hpp"
 #include "gfx/gl.hpp"
@@ -82,6 +83,7 @@ bool Engine::Create(const Config& conf) {
 
   Clock::Init();
 
+  if (!Window::SetIcons()) log(LogLevel::Warning, "failed load window icons");
   Window::Center();
   Window::ShowAndFocus();
   created    = true;

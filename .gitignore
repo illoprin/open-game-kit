@@ -1,6 +1,8 @@
 pkg/include/*
 .sketches
 build/obj
+build/debug
+build/release/obj
 repomix-output.xml
 screenshots
 context.md

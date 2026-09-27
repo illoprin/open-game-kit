@@ -6,7 +6,7 @@
 #include <string_view>
 
 // Reset
-#define RESET   "\033[0m"
+#define RESET "\033[0m"
 
 // Regular Text Colors
 #define BLACK   "\033[30m"
@@ -48,7 +48,6 @@
 #define BG_CYAN    "\033[46m"
 #define BG_WHITE   "\033[47m"
 
-
 enum class LogLevel {
   Info,
   Success,
@@ -62,10 +61,16 @@ inline void log(
   std::format_string<Args...> fmt,
   Args&&... args
 ) noexcept {
+
   // 1. Get current time string
-  auto now =
-    std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-  std::string time_str = std::format("{:%T}", now);
+  auto now = std::chrono::system_clock::now();
+  // cut off precision to seconds
+  std::chrono::zoned_time localTime{
+    std::chrono::current_zone(),
+    std::chrono::floor<std::chrono::milliseconds>(now)
+  };
+  // Format directly to a std::string (YYYY-MM-DD HH:MM:SS)
+  std::string time_str = std::format("{:%Y-%m-%d-%H-%M-%S}", localTime);
 
   // 2. Determine color and tag based on level
   std::string_view color;
@@ -103,14 +108,11 @@ inline void log(
   );
 }
 
-#define LOG_INFO(STR, ...) \
-  log(LogLevel::Info, STR, __VA_ARGS__)
+#define LOG_INFO(STR, ...) log(LogLevel::Info, STR, __VA_ARGS__)
 
-#define LOG_ERR(STR, ...) \
-  log(LogLevel::Error, STR, __VA_ARGS__)
+#define LOG_ERR(STR, ...) log(LogLevel::Error, STR, __VA_ARGS__)
 
-#define LOG_WAR(STR, ...) \
-  log(LogLevel::Warning, STR, __VA_ARGS__)
+#define LOG_WAR(STR, ...) log(LogLevel::Warning, STR, __VA_ARGS__)
 
 template<typename... Args>
 inline void og_assert(

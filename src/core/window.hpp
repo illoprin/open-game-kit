@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
+
 class Window {
 public:
 
@@ -16,6 +17,8 @@ public:
   static void Center();
   static void ShowAndFocus();
   static void ToggleMouseGrab();
+
+  [[nodiscard]] static bool SetIcons();
 
   [[nodiscard]] static bool ShouldClose();
 
