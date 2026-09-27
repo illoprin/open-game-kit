@@ -7,17 +7,18 @@
 #include "core/input.hpp"
 #include "gfx/gl.hpp"
 #include "world/map_repository.hpp"
+#include <array>
 
 bool showColliders = false;
 
-glm::vec2 vertices[] = {
-  {-0.5f, -0.5f}, // 0: Bottom-left
-  {0.5f,  -0.5f}, // 1: Bottom-right
-  {0.5f,  0.5f }, // 2: Top-right
-  {-0.5f, 0.5f }  // 3: Top-left
+std::array<glm::vec2, 4> vertices = {
+  glm::vec2{-1.f, -1.f}, // 0: Bottom-left
+  glm::vec2{1.f,  -1.f}, // 1: Bottom-right
+  glm::vec2{1.f,  1.f }, // 2: Top-right
+  glm::vec2{-1.f, 1.f }  // 3: Top-left
 };
 
-uint indices[] = {
+std::array<uint, 6> indices = {
   0,
   1,
   2,  // First triangle
@@ -49,17 +50,20 @@ BlueState::BlueState() : gBuffer(Engine::ScreenSize()) {
   // build colliders
   phys.FromMap(md, repo);
 
+  // build basic quad
+  basicQuad.FromFlat(vertices, indices);
+
   log(LogLevel::Info, "scene loaded");
 }
 
 void BlueState::OnEnter() noexcept {
-  glEnable(GL_CULL_FACE);
-  glEnable(GL_DEPTH_TEST);
+
   log(LogLevel::Info, "blue state enter");
 }
 
 void BlueState::OnResize() noexcept {
   gBuffer.Resize(Engine::ScreenSize());
+  pipeline.Resize(Engine::ScreenSize());
 }
 
 void BlueState::Update() noexcept {
@@ -75,6 +79,8 @@ void BlueState::Update() noexcept {
 
   fps.ApplyToCamera(cam);
   cam.Update(Window::Size());
+
+  pipeline.DrawUI();
 }
 
 void BlueState::FixedUpdate60() noexcept {
@@ -86,6 +92,9 @@ void BlueState::Render() noexcept {
   // bind GBuffer for drawing
   gBuffer.BindForDrawing(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+
   // render scene
   mRenderer.Render(cam);
 
@@ -93,8 +102,10 @@ void BlueState::Render() noexcept {
   if (showColliders)
     physRenderer.DrawStaticColliders(phys.StaticColliders(), cam);
 
+  const auto& resultBuf = pipeline.Perform(basicQuad, gBuffer, cam);
+
   // blit framebuffer to screen
-  GLuint     bufferId   = gBuffer.GetFramebuffer().ID();
+  GLuint     bufferId   = resultBuf.ID();
   glm::ivec2 bufferSize = gBuffer.Size();
   glm::ivec2 windowSize = Window::Size();
   GL::BlitFramebuffer(

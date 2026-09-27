@@ -1,5 +1,4 @@
 #include "window.hpp"
-#include "GLFW/glfw3.h"
 #include "log.hpp"
 #include "window.hpp"
 
@@ -100,16 +99,6 @@ bool Window::ShouldClose() {
   return glfwWindowShouldClose(handle);
 }
 
-void Window::PollEvents() {
-  if (!created) return;
-  glfwPollEvents();
-}
-
-void Window::SwapBuffers() {
-  if (!created || !handle) return;
-  glfwSwapBuffers(handle);
-}
-
 void Window::SetResizeCallback(ResizeCallback callback) {
   if (!created) return;
   resizeCallback = std::move(callback);
@@ -125,8 +114,4 @@ glm::ivec2 Window::Size() {
 GLFWwindow* Window::Handle() {
   if (!created) return nullptr;
   return handle;
-}
-
-bool Window::Grabbed() {
-  return grabbed;
 }

@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <cstring>
 
-RenderStats GL::stats;
+GL::RenderStats GL::stats = {};
 
 void GL::DrawArrays(
   const VertexArray& vao,
@@ -41,9 +41,6 @@ void GL::DrawElements(
   VertexArray::Unbind();
 }
 
-const RenderStats& GL::GetStats() {
-  return stats;
-}
 
 void GL::ResetStats() {
   stats.Triangles = 0;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx/post/lights.hpp"
 #include "map_parser.hpp"
 #include "gfx/mesh.hpp"
 #include "gfx/texture.hpp"
@@ -25,6 +26,9 @@ public:
   MapRenderer(MapRenderer&&) noexcept = default;
   MapRenderer& operator=(MapRenderer&&) noexcept = default;
 
+  const std::vector<PointLight>& GetPointLights();
+  const std::vector<SpotLight>& GetSpotLights();
+
 private:
   // RenderItem represents each instance view
   struct RenderItem {
@@ -39,6 +43,8 @@ private:
   // scene lighting
   MapData::sun sun{};
   MapData::ambient ambient{};
+  std::vector<PointLight> pointLights;
+  std::vector<SpotLight> spotLights;
 
   Program prog;
 

@@ -74,6 +74,10 @@ void MapRenderer::Init(
     renderItems.push_back(item);
   }
 
+  // 4. Load lights
+
+  // TODO
+
   log(
     LogLevel::Info,
     "MapRenderer: initialized '{}' with {} instances.",

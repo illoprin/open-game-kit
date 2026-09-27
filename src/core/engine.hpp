@@ -6,13 +6,14 @@
 #include <glm/vec2.hpp>
 #include <memory>
 
-
 struct Config {
   glm::ivec2       WinSize;
-  float            Ratio           = 0.75;
-  uint             ScreenshotKey   = GLFW_KEY_F2;
-  std::string_view ScreenshotsPath = {"screenshots"};
-  bool             Debug           = true;
+  float            Ratio               = 0.75;
+  uint             ScreenshotKey       = GLFW_KEY_F2;
+  std::string_view ScreenshotsPath     = {"screenshots"};
+  bool             Debug               = true;
+  float            UIPadding           = 10.0;
+  uint             DebugStatsSwitchKey = GLFW_KEY_F1;
 };
 
 class IEngineState {
@@ -54,7 +55,9 @@ public:
     return created;
   }
 
-  const Config& GetConfig();
+  [[nodiscard]] static const Config& GetConfig() {
+    return cfg;
+  }
 
   static void SetState(std::unique_ptr<IEngineState>& state) noexcept;
 
@@ -62,10 +65,14 @@ public:
 
   static void Destroy();
 
-  static glm::ivec2 ScreenSize();
+  [[nodiscard]] static glm::ivec2 ScreenSize() {
+    return screenSize;
+  }
 
 private:
 
   static bool                          created;
   static std::unique_ptr<IEngineState> currentState;
+  static Config                        cfg;
+  static glm::ivec2                    screenSize;
 };

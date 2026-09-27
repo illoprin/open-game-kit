@@ -3,13 +3,16 @@
 #include "buffer.hpp"
 #include "scene/geometry.hpp"
 #include "vertex_array.hpp"
+#include <span>
 
 class Mesh {
 public:
   Mesh() = default;
   
-  // Создание меша из Geometry (инициализирует VAO, VBO и EBO)
+  // create mesh from geometry (initializes VBO EBO and VAO)
   void FromGeometry(const Geometry& geometry);
+
+  void FromFlat(std::span<const glm::vec2> v, std::span<const uint> i);
 
   // Удаляем конструкторы и операторы копирования
   Mesh(const Mesh&) = delete;
@@ -25,6 +28,8 @@ public:
   const Buffer& GetVBO() const { return vbo; }
   const Buffer& GetEBO() const { return ebo; }
   size_t GetIndexCount() const { return indexCount; }
+
+  void Draw(uint instances = 1) const noexcept;
 
 private:
   VertexArray vao;

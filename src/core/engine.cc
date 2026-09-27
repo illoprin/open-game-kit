@@ -1,18 +1,19 @@
 #include "engine.hpp"
 #include "clock.hpp"
+#include "core./input.hpp"
+#include "game/initial_ui.hpp"
 #include "gfx/gl.hpp"
 #include "input.hpp"
 #include "log.hpp"
 #include "tools.hpp"
 #include "window.hpp"
 
-
 std::unique_ptr<IEngineState> Engine::currentState(nullptr);
 bool                          Engine::created = false;
-glm::ivec2                    eScreenSize{0, 0};
-Config                        eConfig{};
+glm::ivec2                    Engine::screenSize{0, 0};
+Config                        Engine::cfg = {};
 
-glm::ivec2 computeScreenSize(glm::ivec2 size, float r) {
+glm::ivec2 computscreenSize(glm::ivec2 size, float r) {
   return {
     static_cast<int>(static_cast<float>(size[0]) * r),
     static_cast<int>(static_cast<float>(size[1]) * r)
@@ -27,25 +28,25 @@ IEngineState::IEngineState() {
 }
 
 bool Engine::Create(const Config& conf) {
-  eConfig = conf;
+  cfg = conf;
 
   if (created) return false;
   // win size - glm::ivec2
-  og_assert(Window::Create(eConfig.WinSize), "Failed to create window");
+  og_assert(Window::Create(cfg.WinSize), "Failed to create window");
   og_assert(
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress),
     "Failed to create OpenGL 3.3 context"
   );
 
   Window::SetResizeCallback([](int w, int h) {
-    eScreenSize = computeScreenSize({w, h}, eConfig.Ratio);
+    screenSize = computscreenSize({w, h}, cfg.Ratio);
     if (currentState) currentState->OnResize();
     LOG_INFO(
       "resized (Window: {} {}) (Screen: {} {})",
       w,
       h,
-      eScreenSize.x,
-      eScreenSize.y
+      screenSize.x,
+      screenSize.y
     );
   });
 
@@ -82,8 +83,10 @@ bool Engine::Create(const Config& conf) {
 
   Window::Center();
   Window::ShowAndFocus();
-  created     = true;
-  eScreenSize = computeScreenSize(Window::Size(), eConfig.Ratio);
+  created    = true;
+  screenSize = computscreenSize(Window::Size(), cfg.Ratio);
+
+  InitialUI::Init();
 
   log(LogLevel::Info, "Engine initialized");
 
@@ -101,6 +104,8 @@ void Engine::SetState(std::unique_ptr<IEngineState>& state) noexcept {
   currentState->OnEnter();
 }
 
+uch currentStatsMode = 0;
+
 void Engine::Run() {
   if (!created) return;
   while (GL::PopError()) {}
@@ -114,14 +119,22 @@ void Engine::Run() {
     Clock::Update();
     Window::PollEvents();
 
-    if (Input::GetKeyPressed(eConfig.ScreenshotKey))
-      ScreenshotTool::Needs = true;
-
-    if (currentState) currentState->Update();
+    if (Input::GetKeyPressed(cfg.ScreenshotKey)) ScreenshotTool::Needs = true;
+    if (Input::GetKeyPressed(cfg.DebugStatsSwitchKey))
+      DebugUI::SetStatsMode(
+        DebugUI::StatsMode(
+          currentStatsMode + 1 % uch(DebugUI::StatsMode::Count)
+        )
+      );
 
     if (t1.IsExpired()) {
       while (GL::PopError()) {}
     }
+
+    InitialUI::Begin();
+    DebugUI::ShowStats();
+    if (currentState) currentState->Update();
+    InitialUI::End();
 
     if (t30.IsExpired()) {
       if (currentState) currentState->FixedUpdate30();
@@ -136,8 +149,9 @@ void Engine::Run() {
 
     // except rendering to main buffer
     if (currentState) currentState->Render();
+    InitialUI::Render();
 
-    ScreenshotTool::Update(eConfig.ScreenshotsPath);
+    ScreenshotTool::Update(cfg.ScreenshotsPath);
     Window::SwapBuffers();
   }
 }
@@ -145,14 +159,7 @@ void Engine::Run() {
 void Engine::Destroy() {
   if (!created) return;
   if (currentState) currentState.reset();
+  InitialUI::Shutdown();
   Window::Destroy();
   log(LogLevel::Info, "Engine destoyed");
-}
-
-glm::ivec2 Engine::ScreenSize() {
-  return eScreenSize;
-}
-
-const Config& GetConfig() {
-  return eConfig;
 }
