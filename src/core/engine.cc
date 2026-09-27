@@ -1,15 +1,16 @@
 #include "engine.hpp"
 #include "clock.hpp"
 #include "gfx/gl.hpp"
-#include "window.hpp"
 #include "input.hpp"
 #include "log.hpp"
 #include "tools.hpp"
+#include "window.hpp"
+
 
 std::unique_ptr<IEngineState> Engine::currentState(nullptr);
 bool                          Engine::created = false;
-glm::ivec2                    e_screenSize{0, 0};
-const Config*                 e_cfg = nullptr;
+glm::ivec2                    eScreenSize{0, 0};
+Config                        eConfig{};
 
 glm::ivec2 computeScreenSize(glm::ivec2 size, float r) {
   return {
@@ -25,23 +26,26 @@ IEngineState::IEngineState() {
   );
 }
 
-bool Engine::Create(const Config* cfg) {
-  cfg ? e_cfg = cfg : e_cfg = new Config;
+bool Engine::Create(const Config& conf) {
+  eConfig = conf;
 
   if (created) return false;
   // win size - glm::ivec2
-  og_assert(Window::Create(e_cfg->WinSize), "Failed to create window");
-  og_assert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Failed to create OpenGL 3.3 context");
+  og_assert(Window::Create(eConfig.WinSize), "Failed to create window");
+  og_assert(
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress),
+    "Failed to create OpenGL 3.3 context"
+  );
 
   Window::SetResizeCallback([](int w, int h) {
-    e_screenSize = computeScreenSize({w, h}, e_cfg->Ratio);
+    eScreenSize = computeScreenSize({w, h}, eConfig.Ratio);
     if (currentState) currentState->OnResize();
     LOG_INFO(
       "resized (Window: {} {}) (Screen: {} {})",
       w,
       h,
-      e_screenSize.x,
-      e_screenSize.y
+      eScreenSize.x,
+      eScreenSize.y
     );
   });
 
@@ -78,8 +82,8 @@ bool Engine::Create(const Config* cfg) {
 
   Window::Center();
   Window::ShowAndFocus();
-  created      = true;
-  e_screenSize = computeScreenSize(Window::Size(), e_cfg->Ratio);
+  created     = true;
+  eScreenSize = computeScreenSize(Window::Size(), eConfig.Ratio);
 
   log(LogLevel::Info, "Engine initialized");
 
@@ -110,7 +114,7 @@ void Engine::Run() {
     Clock::Update();
     Window::PollEvents();
 
-    if (Input::GetKeyPressed(e_cfg->ScreenshotKey))
+    if (Input::GetKeyPressed(eConfig.ScreenshotKey))
       ScreenshotTool::Needs = true;
 
     if (currentState) currentState->Update();
@@ -133,7 +137,7 @@ void Engine::Run() {
     // except rendering to main buffer
     if (currentState) currentState->Render();
 
-    ScreenshotTool::Update(e_cfg->ScreenshotsPath);
+    ScreenshotTool::Update(eConfig.ScreenshotsPath);
     Window::SwapBuffers();
   }
 }
@@ -146,5 +150,9 @@ void Engine::Destroy() {
 }
 
 glm::ivec2 Engine::ScreenSize() {
-  return e_screenSize;
+  return eScreenSize;
+}
+
+const Config& GetConfig() {
+  return eConfig;
 }

@@ -133,7 +133,8 @@ INSTANCE crate mat_crate 1.0 (15,4,4)    (1,1,1) (0,28,0)
 # ============================================================================
 #  LIGHT <type> <pos> <intensity> <radius> <color> <direction | null>
 
-LIGHT directional (0,50,-30) 1.2 1000.0 (1,0.95,0.9) (-0.3,-1,0.5)
+SUN 1.2 (1,0.95,0.9) (-0.3,-1,0.5)
+AMB 0.2 (0.122,0.408,0.651)
 
 LIGHT point (0,14,0)     0.9 26.0 (0.88,0.92,1)    NULL   # center, cool
 LIGHT point (-14,6,0)    0.7 16.0 (1,0.62,0.55)    NULL   # west platform, red

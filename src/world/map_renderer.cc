@@ -1,15 +1,29 @@
 #include "map_renderer.hpp"
 
-#include "core/log.hpp"
+#include "core./log.hpp"
+#include "core/files.hpp"
 #include "gfx/gl.hpp"
+#include "gfx/program.hpp"
 #include "scene/transforms.hpp"
 #include <glm/gtc/matrix_transform.hpp>
-
 
 void MapRenderer::Init(
   const MapData&       mapData,
   const MapRepository& repository
 ) noexcept {
+
+  og_assert(
+    Program::FastLoad(
+      prog,
+      ShaderPath("g_map.vert"),
+      ShaderPath("g_map.frag")
+    ),
+    "failed load map redering shaders"
+  );
+
+  sun     = mapData.Sun;
+  ambient = mapData.Amb;
+
   // 1. Upload textures to GPU using pre-loaded images from MapRepository
   for (const auto& [id, img] : repository.Images) {
     Texture2D& tex = textures[id];
@@ -68,19 +82,33 @@ void MapRenderer::Init(
   );
 }
 
-void MapRenderer::Render(const Program& program) const {
+void MapRenderer::Render(const Camera3D& cam) const {
+
+  prog.Use();
+  prog.SetMat4("u_projection", cam.GetProjection());
+  prog.SetMat4("u_view", cam.GetView());
+  prog.SetInt("u_diffuse", 0);
+
+  // scene lighting
+  prog.SetVec3("u_sun_direction", sun.Direction);
+  prog.SetVec3("u_sun_color", sun.Color);
+  prog.SetFloat("u_sun_intensity", sun.Intensity);
+
+  prog.SetVec3("u_ambient_color", ambient.Color);
+  prog.SetFloat("u_ambient_intensity", ambient.Intensity);
+
   for (const auto& item : renderItems) {
     if (!item.mesh) continue;
 
-    program.SetInt("u_use_diffuse", static_cast<int>(item.texture == nullptr));
+    prog.SetInt("u_use_diffuse", static_cast<int>(item.texture != nullptr));
     if (item.texture) { item.texture->Bind(0); }
 
-    program.SetInt("u_use_triplanar", static_cast<int>(item.triplanar));
+    prog.SetInt("u_use_triplanar", static_cast<int>(item.triplanar));
 
-    program.SetMat4("u_model", item.model);
-    program.SetFloat("u_uv_scaling", item.uvScale);
+    prog.SetMat4("u_model", item.model);
+    prog.SetFloat("u_uv_scaling", item.uvScale);
 
-    program.SetVec3("u_tint", item.tint);
+    prog.SetVec3("u_tint", item.tint);
 
     GL::DrawElements(
       item.mesh->GetVAO(),

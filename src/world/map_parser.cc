@@ -1,6 +1,6 @@
 #include "map_parser.hpp"
-#include "core/utils.hpp"
 #include "core/log.hpp"
+#include "core/utils.hpp"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -80,7 +80,7 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
       } else if (token == "MATERIAL") {
         std::string id, diffuse, emissive, tintStr;
         if (ss >> id >> diffuse >> emissive >> tintStr) {
-          MapMaterial mat;
+          MapData::material mat;
           mat.ID         = id;
           mat.DiffuseID  = (diffuse == "NULL") ? "" : diffuse;
           mat.EmissiveID = (emissive == "NULL") ? "" : emissive;
@@ -90,7 +90,7 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
       } else if (token == "INSTANCE") {
         std::string proto, matId, uvStr, posStr, sclStr, rotStr;
         if (ss >> proto >> matId >> uvStr >> posStr >> sclStr >> rotStr) {
-          MapInstance inst;
+          MapData::instance inst;
           inst.GeometryID = proto;
           inst.MaterialID = matId;
           inst.UVScaling  = std::stof(uvStr);
@@ -105,9 +105,8 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
         // Читаем ВСЕ поля включая direction (он может быть NULL или vec3)
         if (ss >> typeStr >> posStr >> intensityStr >> radiusStr >> colorStr
             >> dirStr) {
-          LightEntry light{};
-          light.Type      = (typeStr == "directional") ? LightType::Directional
-                                                       : LightType::Point;
+          MapData::light light{};
+          light.Type = (typeStr == "spot") ? LightType::Spot : LightType::Point;
           light.Position  = parseVec3(posStr);
           light.Intensity = std::stof(intensityStr);
           light.Radius    = std::stof(radiusStr);
@@ -123,6 +122,27 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
         } else {
           log(LogLevel::Error, "MapData: Malformed LIGHT entry: {}", line);
         }
+      } else if (token == "SUN") {
+        std::string intensityStr, dirStr, colorStr;
+        if (ss >> intensityStr >> colorStr >> dirStr) {
+          Sun.Color     = parseVec3(colorStr);
+          Sun.Direction = parseVec3(dirStr);
+          Sun.Intensity = std::stof(intensityStr);
+        } else {
+          log(LogLevel::Error, "MapData: Malformed SUN entry: {}", line);
+        }
+      } else if (token == "AMB") {
+        std::string intensityStr, colorStr;
+        if (ss >> intensityStr >> colorStr) {
+          Amb.Color     = parseVec3(colorStr);
+          Amb.Intensity = std::stof(intensityStr);
+        } else {
+          log(
+            LogLevel::Error,
+            "MapData: Malformed AMB (ambient light) entry: {}",
+            line
+          );
+        }
       }
     }
 
@@ -133,18 +153,13 @@ bool MapData::LoadGameMap(const std::string& filepath) noexcept {
       line_num,
       e.what()
     );
-    ;
     return false;
   } catch (...) {
     log(LogLevel::Error, "MapData: unknown exception");
     return false;
   }
 
-  log(
-    LogLevel::Success,
-    "MapData: `{}` data loaded",
-    Name
-  );
+  log(LogLevel::Success, "MapData: `{}` data loaded", Name);
 
   return true;
 }

@@ -49,16 +49,6 @@ BlueState::BlueState() : gBuffer(Engine::ScreenSize()) {
   // build colliders
   phys.FromMap(md, repo);
 
-  // program
-  og_assert(
-    Program::FastLoad(
-      pMain,
-      ShaderPath("basic.vert"),
-      ShaderPath("basic.frag")
-    ),
-    "failed load program"
-  );
-
   log(LogLevel::Info, "scene loaded");
 }
 
@@ -94,26 +84,19 @@ void BlueState::FixedUpdate60() noexcept {
 void BlueState::Render() noexcept {
 
   // bind GBuffer for drawing
-
   gBuffer.BindForDrawing(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  pMain.Use();
-  pMain.SetMat4("u_projection", cam.GetProjection());
-  pMain.SetMat4("u_view", cam.GetView());
-  pMain.SetInt("u_diffuse", 0);
-
   // render scene
+  mRenderer.Render(cam);
 
-  mRenderer.Render(pMain);
+  // render colliders
   if (showColliders)
     physRenderer.DrawStaticColliders(phys.StaticColliders(), cam);
 
   // blit framebuffer to screen
-
   GLuint     bufferId   = gBuffer.GetFramebuffer().ID();
   glm::ivec2 bufferSize = gBuffer.Size();
   glm::ivec2 windowSize = Window::Size();
-
   GL::BlitFramebuffer(
     bufferId,
     0,

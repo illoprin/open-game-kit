@@ -3,3 +3,4 @@ pkg/include/*
 build/obj
 repomix-output.xml
 screenshots
+context.md

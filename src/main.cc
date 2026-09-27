@@ -14,7 +14,7 @@ int main() {
     .WinSize = {1280, 720},
   };
 
-  og_assert(Engine::Create(&conf), "failed to create engine");
+  og_assert(Engine::Create(conf), "failed to create engine");
   glfwSwapInterval(1);
   std::unique_ptr<IEngineState> state(new BlueState);
   Engine::SetState(state);

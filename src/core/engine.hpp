@@ -48,11 +48,13 @@ public:
 class Engine {
 public:
 
-  [[nodiscard]] static bool Create(const Config*);
+  [[nodiscard]] static bool Create(const Config&);
 
   [[nodiscard]] static bool Created() {
     return created;
   }
+
+  const Config& GetConfig();
 
   static void SetState(std::unique_ptr<IEngineState>& state) noexcept;
 

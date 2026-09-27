@@ -11,7 +11,6 @@
 class BlueState : public IEngineState {
 
   GBuffer gBuffer;
-  Program pMain;
 
   MapRenderer  mRenderer;
   PhysicsWorld phys;

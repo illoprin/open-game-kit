@@ -1,3 +1,16 @@
+# OpenGameKit game engine
+
+реализуется игровой движок на C++23 для retro-style шутеров
+
+## Rules
+
+- naming (public - PascalCase, private - camelCase)
+- comments in english starts with lowercase
+- abstractioin reusing
+
+## Map Format
+
+```txt
 # OpenGameKit Map Format
 NAME "Blue Arena"
 
@@ -14,16 +27,20 @@ GEOMETRY crate assets/models/create.obj
 # MATERIAL <id> <diffuse_id | null> <emissive_id | null> <tint>
 MATERIAL mat_crate crate NULL (1,1,1)
 
-# INSTANCE <proto_id> <material_id> <uv_scale> <pos> <scl> <rot>
+# INSTANCE <geometry_id> <material_id> <uv_scale> <pos> <scl> <rot>
 # INSTANCE cube brick 1.0 (-1,0,1) (1,1,1) (0,23,0)
-# `proto_id` can be initial primitive `cube [-1..1]` `plane [-1..1]`
-
-# SUN <intensity> <direction> <color>
-SUN 20.0 (0.3,-0.8,0.3) (0.4,0.34,0.1)
-# AMB <intensity> <color>
-AMB 0.2 (0.122,0.408,0.651)
+# `geometry_id` can be initial primitive `cube [-1..1]` `plane [-1..1]`
 
 # LIGHT <type> <pos> <intensity> <radius> <color> <direction | null>
 # there is two types of lights - `point` `directional`
-LIGHT spot (0,50,-30) 1.2 1000.0 (-0.3,-1,0.5) (1,0.95,0.9)
+LIGHT directional (0,50,-30) 1.2 1000.0 (-0.3,-1,0.5) (1,0.95,0.9)
 LIGHT point (0,20,0) 0.8 10.0 (0.9,0.95,1) NULL
+```
+
+## Structure
+
+{{STRUCTURE}}
+
+## Files
+
+{{FILES}}

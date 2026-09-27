@@ -4,6 +4,7 @@
 #include "gfx/mesh.hpp"
 #include "gfx/texture.hpp"
 #include "gfx/program.hpp"
+#include "scene/camera.hpp"
 #include "world/map_repository.hpp"
 #include <unordered_map>
 #include <string>
@@ -17,7 +18,7 @@ public:
   void Init(const MapData&, const MapRepository&) noexcept;
 
   // Render all map items
-  void Render(const Program& program) const;
+  void Render(const Camera3D& cam) const;
 
   MapRenderer(const MapRenderer&) = delete;
   MapRenderer& operator=(const MapRenderer&) = delete;
@@ -34,6 +35,12 @@ private:
     glm::vec3 tint{1.f};
     glm::mat4 model{1.f};
   };
+
+  // scene lighting
+  MapData::sun sun{};
+  MapData::ambient ambient{};
+
+  Program prog;
 
   std::vector<RenderItem> renderItems;
   
