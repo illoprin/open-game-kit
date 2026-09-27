@@ -5,8 +5,11 @@
 
 #include "core/files.hpp"
 #include "core/input.hpp"
+#include "core/window.hpp"
+#include "game/initial_ui.hpp"
 #include "gfx/gl.hpp"
 #include "world/map_repository.hpp"
+#include <GL/gl.h>
 #include <array>
 
 bool showColliders = false;
@@ -68,11 +71,15 @@ void BlueState::OnResize() noexcept {
 
 void BlueState::Update() noexcept {
 
-  if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) Window::ToggleMouseGrab();
+  if (Input::GetKeyPressed(GLFW_KEY_ESCAPE)) {
+    InitialUI::SetWantCaptureInput(false);
+    Window::ToggleMouseGrab();
+  }
 
   if (Input::GetKeyPressed(GLFW_KEY_F3)) showColliders = !showColliders;
 
-  if (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1)) {
+  bool canUpdateLook = (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1)) && !InitialUI::WantCaptureInput();
+  if (canUpdateLook) {
     fps.UpdateLook(cam);
     fps.ProcessInput();
   }
@@ -103,11 +110,15 @@ void BlueState::Render() noexcept {
     physRenderer.DrawStaticColliders(phys.StaticColliders(), cam);
 
   const auto& resultBuf = pipeline.Perform(basicQuad, gBuffer, cam);
+  
+  glm::ivec2 windowSize = Window::Size();
+
+  glViewport(0, 0, windowSize.x, windowSize.y);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // blit framebuffer to screen
   GLuint     bufferId   = resultBuf.ID();
   glm::ivec2 bufferSize = gBuffer.Size();
-  glm::ivec2 windowSize = Window::Size();
   GL::BlitFramebuffer(
     bufferId,
     0,

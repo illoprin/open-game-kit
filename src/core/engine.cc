@@ -1,6 +1,7 @@
 #include "engine.hpp"
 #include "clock.hpp"
 #include "core./input.hpp"
+#include "core./window.hpp"
 #include "game/initial_ui.hpp"
 #include "gfx/gl.hpp"
 #include "input.hpp"
@@ -119,19 +120,19 @@ void Engine::Run() {
     Clock::Update();
     Window::PollEvents();
 
+    InitialUI::Begin();
+
     if (Input::GetKeyPressed(cfg.ScreenshotKey)) ScreenshotTool::Needs = true;
-    if (Input::GetKeyPressed(cfg.DebugStatsSwitchKey))
-      DebugUI::SetStatsMode(
-        DebugUI::StatsMode(
-          currentStatsMode + 1 % uch(DebugUI::StatsMode::Count)
-        )
-      );
+    if (Input::GetKeyPressed(cfg.DebugStatsSwitchKey)) {
+      currentStatsMode += 1;
+      currentStatsMode %= uch(DebugUI::StatsMode::Count);
+      DebugUI::SetStatsMode(DebugUI::StatsMode(currentStatsMode));
+    }
 
     if (t1.IsExpired()) {
       while (GL::PopError()) {}
     }
 
-    InitialUI::Begin();
     DebugUI::ShowStats();
     if (currentState) currentState->Update();
     InitialUI::End();
@@ -145,10 +146,11 @@ void Engine::Run() {
     }
 
     GL::ResetStats();
-    VertexArray::Unbind();
+    // VertexArray::Unbind();
 
     // except rendering to main buffer
     if (currentState) currentState->Render();
+
     InitialUI::Render();
 
     ScreenshotTool::Update(cfg.ScreenshotsPath);

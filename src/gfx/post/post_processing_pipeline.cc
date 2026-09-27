@@ -1,7 +1,10 @@
 #include "post_processing_pipeline.hpp"
+#include "core/engine.hpp"
+#include "core/window.hpp"
 #include "gfx/framebuffer.hpp"
 #include "gfx/post/ping_pong_buffer.hpp"
 #include "gfx/resource.hpp"
+#include "imgui/imgui.h"
 
 PostProcessingPipeline::PostProcessingPipeline(glm::ivec2 screenSize)
     : buffer(screenSize) {
@@ -17,7 +20,7 @@ void PostProcessingPipeline::pass(uint& idx, IPostEffect& fx) noexcept {
 
   fx.RenderPass(ctx);
 
-  ++idx;
+  idx++;
 
   buffer.Swap();
 }
@@ -44,11 +47,31 @@ const Framebuffer& PostProcessingPipeline::Perform(
 
   pass(idx, vignette);
 
+  if (idx == 0) return gBuffer.GetFramebuffer();
+
   return buffer.GetReadBuffer().GetFramebuffer();
 }
 
 void PostProcessingPipeline::DrawUI() noexcept {
-  vignette.DrawConfigUI();
+  ImGuiWindowFlags flags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus
+                           | ImGuiWindowFlags_NoResize;
+
+  glm::ivec2 win_size   = Window::Size();
+  float      ui_padding = Engine::GetConfig().UIPadding;
+  ImGui::SetNextWindowPos({win_size.x - ui_padding, ui_padding}, 0, {1.0, 0});
+  ImGui::SetNextWindowSize(
+    {static_cast<float>(static_cast<float>(win_size.x) / 4.0),
+     win_size.y - ui_padding * 2}
+  );
+
+  ImGui::Begin("Post Effects", nullptr, flags);
+  // ImGui::SeparatorText("Core");
+
+  // ImGui::SeparatorText("Light");
+
+  ImGui::SeparatorText("Cosmetic");
+  if (ImGui::CollapsingHeader(vignette.GetName())) vignette.DrawConfigUI();
+  ImGui::End();
 }
 
 void PostProcessingPipeline::Resize(glm::ivec2 newSize) noexcept {

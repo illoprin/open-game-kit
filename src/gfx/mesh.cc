@@ -70,5 +70,5 @@ void Mesh::FromFlat(std::span<const glm::vec2> v, std::span<const uint> i) {
 void Mesh::Draw(uint instances) const noexcept {
   if (indexCount < 3 || !instances) return;
 
-  GL::DrawElements(vao, indexCount, GL_TRIANGLES, instances);
+  GL::DrawElements(vao, indexCount, GL_UNSIGNED_INT, instances);
 }

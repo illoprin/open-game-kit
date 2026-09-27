@@ -31,7 +31,7 @@ void VignettePass::RenderPass(const PostProcessingContext& ctx) noexcept {
   prog.Use();
 
   ctx.Color->Bind(0);
-  prog.SetFloat("u_color", 0);
+  prog.SetInt("u_color", 0);
 
   prog.SetFloat("u_radius", cfg.Radius);
   prog.SetFloat("u_softness", cfg.Softness);
