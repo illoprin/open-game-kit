@@ -75,8 +75,6 @@ void BlueState::Update() noexcept {
 
   if (Input::GetKeyPressed(GLFW_KEY_F3)) showColliders = !showColliders;
 
-  if (Input::GetKeyPressed(GLFW_KEY_G)) readBuf = (readBuf + 1) % 2;
-
   bool canUpdateLook =
     (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1))
     && !InitialUI::WantCaptureInput();
