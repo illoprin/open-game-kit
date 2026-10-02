@@ -1,5 +1,6 @@
-pkg/include/*
+/.backup
 .sketches
+pkg/include/*
 build/obj
 build/debug
 build/release/obj

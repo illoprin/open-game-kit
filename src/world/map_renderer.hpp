@@ -30,6 +30,12 @@ public:
   const std::vector<SpotLight>& GetSpotLights();
 
 private:
+
+  void loadTextures(const MapRepository&) noexcept;
+  void loadGeometry(const MapRepository&) noexcept;
+  void loadInstances(const MapData&) noexcept;
+  void loadLights(const MapData&) noexcept;
+
   // RenderItem represents each instance view
   struct RenderItem {
     const Mesh* mesh = nullptr;
