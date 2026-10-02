@@ -75,7 +75,11 @@ void BlueState::Update() noexcept {
 
   if (Input::GetKeyPressed(GLFW_KEY_F3)) showColliders = !showColliders;
 
-  bool canUpdateLook = (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1)) && !InitialUI::WantCaptureInput();
+  if (Input::GetKeyPressed(GLFW_KEY_G)) readBuf = (readBuf + 1) % 2;
+
+  bool canUpdateLook =
+    (Window::Grabbed() || Input::IsButtonDown(GLFW_MOUSE_BUTTON_1))
+    && !InitialUI::WantCaptureInput();
   if (canUpdateLook) {
     fps.UpdateLook(cam);
     fps.ProcessInput();
@@ -102,16 +106,22 @@ void BlueState::Render() noexcept {
   // render scene
   mRenderer.Render(cam);
 
-  // render colliders
-  if (showColliders)
-    physRenderer.DrawStaticColliders(phys.StaticColliders(), cam);
+  const auto& resultBuf = pipeline.Perform(
+    basicQuad,
+    gBuffer,
+    cam,
+    mRenderer.GetPointLights(),
+    mRenderer.GetSpotLights()
+  );
 
-  const auto& resultBuf = pipeline.Perform(basicQuad, gBuffer, cam);
-  
   glm::ivec2 windowSize = Window::Size();
 
   glViewport(0, 0, windowSize.x, windowSize.y);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  
+  // render colliders
+  if (showColliders)
+    physRenderer.DrawStaticColliders(phys.StaticColliders(), cam);
 
   // blit framebuffer to screen
   GLuint     bufferId   = resultBuf.ID();

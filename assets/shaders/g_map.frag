@@ -10,7 +10,8 @@ uniform bool u_use_diffuse = true;
 uniform float u_uv_scaling = 1.0;
 uniform vec3 u_tint = vec3(1.0);
 
-out vec4 out_fragcolor;
+out layout(location = 0) vec4 out_fragcolor;
+out layout(location = 1) vec3 out_normal;
 
 // sunlight
 uniform vec3 u_sun_direction;
@@ -20,6 +21,9 @@ uniform float u_sun_intensity;
 // ambient
 uniform vec3 u_ambient_color;
 uniform float u_ambient_intensity;
+
+// matrices
+uniform mat4 u_view;
 
 vec3 TriplanarUV(vec3 pos, vec3 normal, float scale) {
   vec3 blend = abs(normal);
@@ -53,6 +57,8 @@ vec3 lighting() {
 }
 
 void main() {
+  out_normal = normalize(mat3(u_view) * v_world_normal);
+  
   // calculate lighting
   vec3 lighting = lighting();
 

@@ -26,25 +26,29 @@ void PostProcessingPipeline::pass(uint& idx, IPostEffect& fx) noexcept {
 }
 
 const Framebuffer& PostProcessingPipeline::Perform(
-  const Mesh&     basicQuad,
-  const GBuffer&  gBuffer,
-  const Camera3D& cam
-  // TODO std::span for lights
+  const Mesh&                    basicQuad,
+  const GBuffer&                 gBuffer,
+  const Camera3D&                cam,
+  const std::vector<PointLight>& pointLights,
+  const std::vector<SpotLight>&  spotLights
 ) noexcept {
 
-  ctx.BasicQuad = &basicQuad;
-  ctx.CamPos    = cam.Position;
-  ctx.View      = cam.GetView();
-  ctx.Proj      = cam.GetProjection();
-  ctx.Normal    = &gBuffer.GetNormal();
-  ctx.Depth     = &gBuffer.GetDepth();
-  ctx.Color     = &gBuffer.GetDiffuse();
+  ctx.BasicQuad   = &basicQuad;
+  ctx.CamPos      = cam.Position;
+  ctx.View        = cam.GetView();
+  ctx.Proj        = cam.GetProjection();
+  ctx.Normal      = &gBuffer.GetNormal();
+  ctx.Depth       = &gBuffer.GetDepth();
+  ctx.Color       = &gBuffer.GetDiffuse();
+  ctx.PointLights = &pointLights;
+  ctx.SpotLights  = &spotLights;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   uint idx = 0;
 
+  pass(idx, light);
   pass(idx, vignette);
 
   if (idx == 0) return gBuffer.GetFramebuffer();
